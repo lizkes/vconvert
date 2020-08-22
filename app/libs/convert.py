@@ -41,6 +41,8 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         command.extend(["-f", "matroska"])
     elif config["format"] == "mp4":
         command.extend(["-f", "mp4"])
+    elif config["format"] == "webm":
+        command.extend(["-f", "webm"])
 
     if config["threads"]:
         command.extend(["-threads", config["threads"]])
@@ -49,7 +51,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     # for x265 doc, see https://x265.readthedocs.io/en/default/cli.html#profile-level-tier
     if video_index is None:
         if config["vc"] == "h264":
-            command.extend(["-codec:v", "libx264", "-level:v", "4.2"])
+            command.extend(["-codec:v", "libx264", "-level:v", "4.2", "-preset", "medium"])
             if config["bit"] == "8":
                 if pix_fmt == "yuv420p":
                     command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
@@ -65,7 +67,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
                 elif pix_fmt == "yuv444p":
                     command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
         elif config["vc"] == "h265":
-            command.extend(["-codec:v", "libx265", "-x265-params", "level-idc=4.2"])
+            command.extend(["-codec:v", "libx265", "-x265-params", "level-idc=4.2", "-preset", "medium"])
             if config["bit"] == "8":
                 if pix_fmt == "yuv420p" or pix_fmt == "yuv422p":
                     command.extend(["-profile:v", "main"])
@@ -78,8 +80,10 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
                     command.extend(["-profile:v", "main422-10"])
                 elif pix_fmt == "yuv444p":
                     command.extend(["-profile:v", "main444-10"])
+        elif config["vc"] == "vp9":
+            command.extend(["-codec:v", "libvpx-vp9", "-b:v", "0", "-level:v", "4.2", "-row-mt", "1"])
 
-        command.extend(["-crf", "18", "-preset", "medium"])
+        command.extend(["-crf", "18"])
     else:
         command.extend([f"-codec:v:{video_index}", "copy"])
 
@@ -87,6 +91,8 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         if config["ac"] == "aac":
             # -vbr min:1 max:5
             command.extend(["-codec:a", "libfdk_aac", "-vbr", "4"])
+        elif config["ac"] == "opus":
+            command.extend(["-codec:a", "libopus", "-vbr", "1", "-b:a", "64k"])
 
     else:
         command.extend([f"-codec:a:{audio_index}", "copy"])
@@ -155,16 +161,18 @@ def handbrake_convert(input_path: Path, temp_path: Path):
 
     if config["vc"] == "h264":
         if config["bit"] == "8":
-            command.extend(["--encoder", "x264", "--encoder-profile", "high",],)
+            command.extend(["--encoder", "x264", "--encoder-profile", "high", "--encoder-level", "4.2"])
         elif config["bit"] == "10":
-            command.extend(["--encoder", "x264_10bit", "--encoder-profile", "high10",],)
+            command.extend(["--encoder", "x264_10bit", "--encoder-profile", "high10", "--encoder-level", "4.2"])
     elif config["vc"] == "h265":
         if config["bit"] == "8":
             command.extend(
-                ["--encoder", "x265", "--encoder-profile", "main",]
+                ["--encoder", "x265", "--encoder-profile", "main", "--encoder-level", "4.2"]
             )
         elif config["bit"] == "10":
-            command.extend(["--encoder", "x265_10bit", "--encoder-profile", "main10",],)
+            command.extend(["--encoder", "x265_10bit", "--encoder-profile", "main10", "--encoder-level", "4.2"])
+    elif config["vc"] == "vp9":
+            command.extend(["--encoder", "VP9"])
 
     command.extend(
         [
@@ -173,8 +181,6 @@ def handbrake_convert(input_path: Path, temp_path: Path):
             "--encoder-preset",
             "medium",
             "--align-av",
-            "--encoder-level",
-            "4.2",
             "--keep-display-aspect",
             "--auto-anamorphic",
             "--maxHeight",
@@ -182,16 +188,15 @@ def handbrake_convert(input_path: Path, temp_path: Path):
             "--maxWidth",
             "1920",
             "--main-feature",
-            "--first-audio",
-            "--aencoder",
-            "copy:aac",
-            "--aq",
-            "10",
+            # "--first-audio",
         ]
     )
 
     if config["ac"] == "aac":
-        command.extend(["--audio-fallback", "ca_haac"])
+        command.extend(["--aencoder", "copy:aac", "--audio-fallback", "ca_haac"])
+    elif config["ac"] == "opus":
+        command.extend(["--aencoder", "opus"])
+    command.extend(["--aq", "8"])
 
     if config["remove_subtitle"] != "true":
         command.extend(
