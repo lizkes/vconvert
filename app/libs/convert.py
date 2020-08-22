@@ -15,7 +15,11 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
     audio_index = match_codec(info, "audio", config["ac"])
 
     # check whether format is same
-    if get_file_format(input_path) == config["format"] and video_index is not None and audio_index is not None:
+    if (
+        get_file_format(input_path) == config["format"]
+        and video_index is not None
+        and audio_index is not None
+    ):
         logging.info("same format, nothing to do.")
         return
 
@@ -99,6 +103,20 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
         #     raise subprocess.SubprocessError(
         #         "ffmpeg error, check log file for more information.")
 
+    # cleanup
+    if config["remove_source"] == "true":
+        # remove source file
+        rm(input_path)
+    else:
+        # rename and keep source file
+        input_path.rename(input_path.resolve().as_posix() + ".source")
+
+    # rename target file
+    dist_path = Path(config["output"]).joinpath(
+        output_path.relative_to(config["output"])
+    )
+    output_path.rename(dist_path)
+
 
 def handbrake_convert(input_path: Path, output_path: Path):
     # build handbrake run command
@@ -154,7 +172,14 @@ def handbrake_convert(input_path: Path, output_path: Path):
             ]
         )
 
-    command.extend(["-i", quote(input_path.resolve().as_posix()), "-o", quote(output_path.resolve().as_posix())])
+    command.extend(
+        [
+            "-i",
+            quote(input_path.resolve().as_posix()),
+            "-o",
+            quote(output_path.resolve().as_posix()),
+        ]
+    )
     logging.debug(" ".join(command))
 
     with subprocess.run(
@@ -181,6 +206,20 @@ def handbrake_convert(input_path: Path, output_path: Path):
         # if proc.returncode != 0:
         #     raise subprocess.SubprocessError(
         #         "HandBrakeCLI error, check log file for more information.")
+
+    # cleanup
+    if config["remove_source"] == "true":
+        # remove source file
+        rm(input_path)
+    else:
+        # rename and keep source file
+        input_path.rename(input_path.resolve().as_posix() + ".source")
+
+    # rename target file
+    dist_path = Path(config["output"]).joinpath(
+        output_path.relative_to(config["output"])
+    )
+    output_path.rename(dist_path)
 
 
 # def uncompress(in_path_str, out_path_str):

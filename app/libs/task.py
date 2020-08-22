@@ -24,27 +24,14 @@ class Task:
         if self.ttype == "normal":
             ffmpeg_convert(input_path, output_path)
         elif self.ttype == "dvd":
-            handbrake_convert(self.path, get_output_path(self.path))
+            handbrake_convert(input_path, output_path)
         elif self.ttype == "dvd-folder":
-            handbrake_convert(self.path, get_output_path(self.path))
+            handbrake_convert(input_path, output_path)
         elif self.ttype == "iso":
-            handbrake_convert(self.path, get_output_path(self.path))
+            handbrake_convert(input_path, output_path)
         else:
             fatal(f"未知的task_type: {self.ttype}")
             _exit(10)
-
-        if config["remove_source"] == "true":
-            # remove source file
-            rm(input_path)
-        else:
-            # rename and keep source file
-            input_path.rename(input_path.resolve().as_posix() + ".source")
-
-        # rename target file
-        dist_path = Path(config["output"]).joinpath(
-            output_path.relative_to(config["output"])
-        )
-        output_path.rename(dist_path)
 
         self.status = "success"
 
