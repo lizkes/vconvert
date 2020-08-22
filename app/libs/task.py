@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import List
 from os import _exit
-from logging import debug, info, error
+from logging import debug, info, error, fatal
 
-from .time import strf_datetime, strf_datetime_pretty
+from .time import strf_datetime
 from .convert import ffmpeg_convert, handbrake_convert
 from .path import get_output_path, rm
 from ..env import config
@@ -17,14 +17,34 @@ class Task:
 
     def execute(self):
         self.status = "runing"
+        
+        input_path = self.path
+        output_path = get_output_path(input_path)
+
         if self.ttype == "normal":
-            ffmpeg_convert(self.path, get_output_path(self.path))
+            ffmpeg_convert(input_path, output_path)
         elif self.ttype == "dvd":
+            handbrake_convert(self.path, get_output_path(self.path))
+        elif self.ttype == "dvd-folder":
             handbrake_convert(self.path, get_output_path(self.path))
         elif self.ttype == "iso":
             handbrake_convert(self.path, get_output_path(self.path))
-        self.status = "success"
+        else:
+            fatal(f"未知的task_type: {self.ttype}")
+            _exit(10)
 
+        if config["remove_source"] == "true":
+            # remove source file
+            rm(input_path)
+        else:
+            # rename and keep source file
+            input_path.rename(input_path.resolve().as_posix() + ".source")
+
+        # rename target file
+        dist_path = Path.joinpath(config["input"], output_path.relative_to(config["output"]))
+        output_path.rename(dist_path)
+
+        self.status = "success"
 
 class Tasks:
     def __init__(
@@ -43,7 +63,7 @@ class Tasks:
 
     def add_task(self, task: Task):
         for t in self.task_list:
-            if t.path.as_posix() == task.path.as_posix():
+            if t.path.resolve().as_posix() == task.path.resolve().as_posix():
                 return
         self.task_list.append(task)
 
@@ -55,10 +75,10 @@ class Tasks:
 
     def execute_task(self, index: int = None):
         if self.status == "running":
-            debug(f"{strf_datetime_pretty()} 任务已在执行，本次执行取消")
+            debug("任务已在执行，本次执行取消")
             return
 
-        debug(f"{strf_datetime_pretty()} 开始执行任务")
+        debug("开始执行任务")
         self.status = "running"
 
         executed_task_list = []
@@ -72,8 +92,8 @@ class Tasks:
             executed_task_list = self.task_list
 
         for i, task in enumerate(executed_task_list):
-            info(f"[{i + 1}/{len(executed_task_list)}] {strf_datetime_pretty()}")
-            info(f"Task Start: {task.path.as_posix()}")
+            info(f"[{i + 1}/{len(executed_task_list)}]")
+            info(f"Task Start: {task.path.resolve().as_posix()}")
 
             try:
                 task.execute()
@@ -83,14 +103,14 @@ class Tasks:
                 task.status = "waiting"
                 _exit(1)
             except Exception as e:
-                error(f"[{i + 1}/{len(executed_task_list)}] {strf_datetime_pretty()}")
-                error(e)
+                fatal(f"[{i + 1}/{len(executed_task_list)}]")
+                fatal(e)
                 rm(get_output_path(task.path))
                 task.status = "error"
                 _exit(10)
 
             self.remove_task(i)
-            info(f"[{i + 1}/{len(executed_task_list)}] {strf_datetime_pretty()}")
-            info(f"Task Done: {task.path.as_posix()}")
+            info(f"[{i + 1}/{len(executed_task_list)}]")
+            info(f"Task Done: {task.path.resolve().as_posix()}")
 
         self.status = "wating"

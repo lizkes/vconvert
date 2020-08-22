@@ -19,9 +19,9 @@ def strp_datetime(time_str: str):
     )
 
 
-def strf_time(time: datetime):
+def strf_time(time: datetime = get_now_datetime()):
     return datetime.strftime(time, "%H%M%S")
 
 
-def strf_date(time: datetime):
+def strf_date(time: datetime = get_now_datetime()):
     return datetime.strftime(time, "%y%m%d")

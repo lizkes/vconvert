@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import logging.handlers
 from pathlib import Path
 from time import sleep
 
@@ -22,6 +23,7 @@ if __name__ == "__main__":
                 Path.joinpath(current_path, "logs", "run.log"),
                 maxBytes=1 * 1024 * 1024,
                 backupCount=5,
+                encoding="utf-8"
             ),
             logging.StreamHandler(sys.stdout),
         ],
@@ -30,6 +32,6 @@ if __name__ == "__main__":
     tasks = Tasks()
 
     while True:
-        filter_video(tasks)
+        filter_video(tasks=tasks)
         tasks.execute_task()
         sleep(1 * 60 * 60)

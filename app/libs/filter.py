@@ -31,7 +31,7 @@ SUPPORT_ISO_SUFFIXES = ["iso"]
 
 def traverse(dir_path: Path, tasks):
     if dir_path.name.upper() == "VIDEO_TS":
-        tasks.add_task(Task(dir_path, "dvd"))
+        tasks.add_task(Task(dir_path, "dvd-folder"))
         return
 
     for child in dir_path.iterdir():

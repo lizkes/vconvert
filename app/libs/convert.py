@@ -98,16 +98,6 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
         #     raise subprocess.SubprocessError(
         #         "ffmpeg error, check log file for more information.")
 
-    if config["remove_source"] == "true":
-        # remove source file
-        rm(input_path)
-    else:
-        # rename and keep source file
-        input_path.rename(input_path.as_posix() + ".source")
-
-    # rename target file
-    output_path.rename(input_path)
-
 
 def handbrake_convert(input_path: Path, output_path: Path):
     # build handbrake run command
@@ -190,16 +180,6 @@ def handbrake_convert(input_path: Path, output_path: Path):
         # if proc.returncode != 0:
         #     raise subprocess.SubprocessError(
         #         "HandBrakeCLI error, check log file for more information.")
-
-    if config["remove_source"] == "true":
-        # remove source file
-        rm(input_path)
-    else:
-        # rename and keep source file
-        input_path.rename(input_path.as_posix() + ".source")
-
-    # rename target file
-    output_path.rename(input_path)
 
 
 # def uncompress(in_path_str, out_path_str):

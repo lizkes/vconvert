@@ -20,7 +20,7 @@
         ],
         [
             "/test/VIDEO_TS",
-            "dvd",
+            "dvd-folder",
             "waiting"
         ]
     ]
