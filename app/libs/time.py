@@ -8,8 +8,10 @@ def get_now_datetime():
 def strf_datetime(time: datetime = get_now_datetime()):
     return datetime.strftime(time, "%y%m%d%H%M%S")
 
+
 def strf_datetime_pretty(time: datetime = get_now_datetime()):
     return datetime.strftime(time, "%y/%m/%d %H:%M:%S")
+
 
 def strp_datetime(time_str: str):
     return datetime.strptime(time_str, "%y%m%d%H%M%S").replace(

@@ -1,9 +1,8 @@
 import shutil
-import logging
+from logging import debug, warn
 from pathlib import Path
 from time import sleep
 
-from .log import pdebug, pwarn
 from ..env import config
 
 
@@ -33,11 +32,11 @@ def rm(path: Path):
                 elif path.is_file():
                     path.unlink()
                 else:
-                    pwarn(f"{path} is not dir or file, can't delete.")
+                    warn(f"{path} is not dir or file, can't delete.")
             else:
-                pwarn(f"{path} is not exist, can't delete.")
+                warn(f"{path} is not exist, can't delete.")
             break
         except PermissionError as e:
             try_time -= 1
-            pdebug("\n", e, "\nRetry after one second")
+            debug("\n", e, "\nRetry after one second")
             sleep(1)
