@@ -17,7 +17,7 @@ class Task:
 
     def execute(self):
         self.status = "runing"
-        
+
         input_path = self.path
         output_path = get_output_path(input_path)
 
@@ -41,10 +41,13 @@ class Task:
             input_path.rename(input_path.resolve().as_posix() + ".source")
 
         # rename target file
-        dist_path = Path.joinpath(config["input"], output_path.relative_to(config["output"]))
+        dist_path = Path(config["output"]).joinpath(
+            output_path.relative_to(config["output"])
+        )
         output_path.rename(dist_path)
 
         self.status = "success"
+
 
 class Tasks:
     def __init__(

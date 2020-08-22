@@ -21,10 +21,10 @@ if __name__ == "__main__":
         datefmt="%y/%m/%d %H:%M:%S",
         handlers=[
             logging.handlers.RotatingFileHandler(
-                Path.joinpath(current_path, "logs", "run.log"),
+                Path(current_path).joinpath("logs", "run.log"),
                 maxBytes=1 * 1024 * 1024,
                 backupCount=5,
-                encoding="utf-8"
+                encoding="utf-8",
             ),
             logging.StreamHandler(sys.stdout),
         ],
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     Path(config["input"]).mkdir(exist_ok=True)
     Path(config["output"]).mkdir(exist_ok=True)
-    
+
     tasks = Tasks()
 
     while True:

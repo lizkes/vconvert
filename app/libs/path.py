@@ -10,12 +10,19 @@ from ..env import config
 def get_output_path(input_path: Path):
     if input_path.is_file():
         return Path(
-            Path.joinpath(config["output"], change_file_format(input_path, config["format"]).relative_to(config["input"]))
+            Path(config["output"]).joinpath(
+                change_file_format(input_path, config["format"]).relative_to(
+                    config["input"]
+                )
+            )
         )
     elif input_path.is_dir():
         if input_path.name.upper() == "VIDEO_TS":
             return Path(
-                Path.joinpath(config["output"], input_path.parent.relative_to(config["input"]), f"{input_path.parent.name}.{config['format']}")
+                Path(config["output"]).joinpath(
+                    input_path.parent.relative_to(config["input"]),
+                    f"{input_path.parent.name}.{config['format']}",
+                )
             )
         else:
             fatal("输出路径是不支持的文件夹: ", input_path.as_posix())
@@ -23,6 +30,7 @@ def get_output_path(input_path: Path):
     else:
         fatal("输出路径既不是文件也不是文件夹: ", input_path.as_posix())
         _exit(1)
+
 
 def get_file_format(input_path: Path):
     if input_path.is_file():
@@ -33,12 +41,14 @@ def get_file_format(input_path: Path):
                 return file_format
     return None
 
+
 def change_file_format(input_path: Path, format: str):
     if input_path.is_file():
         suffix = input_path.suffix
         if suffix:
             return Path(f"{input_path.as_posix()[:-(len(suffix)-1)]}{format}")
     return input_path
+
 
 def rm(path: Path):
     try_count = 10
