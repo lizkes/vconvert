@@ -96,9 +96,10 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
                     logging.debug("subprocess exit, done")
                     break
             logging.debug(text)
-        # if proc.returncode != 0:
-        #     raise subprocess.SubprocessError(
-        #         "ffmpeg error, check log file for more information.")
+        if proc.returncode != 0:
+            raise subprocess.SubprocessError(
+                "ffmpeg error, check log file for more information."
+            )
 
     # cleanup
     if config["remove_source"] == "true":
@@ -207,9 +208,10 @@ def handbrake_convert(input_path: Path, temp_path: Path):
                     logging.debug("subprocess exit, done")
                     break
             logging.debug(text)
-        # if proc.returncode != 0:
-        #     raise subprocess.SubprocessError(
-        #         "HandBrakeCLI error, check log file for more information.")
+        if proc.returncode != 0:
+            raise subprocess.SubprocessError(
+                "HandBrakeCLI error, check log file for more information."
+            )
 
     # cleanup
     if config["remove_source"] == "true":
