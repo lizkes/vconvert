@@ -79,7 +79,7 @@ class Tasks:
                 self.status = "wating"
                 return
         else:
-            executed_task_list = self.task_list
+            executed_task_list = self.task_list.copy()
 
         for i, task in enumerate(executed_task_list):
             info(f"[{i + 1}/{len(executed_task_list)}]")

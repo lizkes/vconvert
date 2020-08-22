@@ -86,7 +86,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         encoding="utf-8",
     ) as proc:
         while True:
-            text = proc.stdout.readline()
+            text = proc.stdout.readline().rstrip("\n")
             if text == "":
                 if proc.poll() is None:
                     logging.debug("subprocess not exit, sleep 0.5s")
@@ -124,18 +124,34 @@ def handbrake_convert(input_path: Path, temp_path: Path):
     ]
 
     if config["vc"] == "h264":
-        command.extend(["--encoder", "x264"])
+        command.extend(
+            [
+                "--encoder",
+                "x264",
+                "--quality",
+                "20",
+                "--encoder-preset",
+                "medium",
+                "--encoder-profile",
+                "high",
+            ],
+        )
     elif config["vc"] == "h265":
-        command.extend(["--encoder", "x265"])
+        command.extend(
+            [
+                "--encoder",
+                "x265",
+                "--quality",
+                "20",
+                "--encoder-preset",
+                "medium",
+                "--encoder-profile",
+                "main",
+            ]
+        )
 
     command.extend(
         [
-            "--quality",
-            "20",
-            "--encoder-preset",
-            "medium",
-            "--encoder-profile",
-            "high",
             "--align-av",
             "--encoder-level",
             "4.1",
@@ -168,12 +184,7 @@ def handbrake_convert(input_path: Path, temp_path: Path):
         )
 
     command.extend(
-        [
-            "-i",
-            input_path.resolve().as_posix(),
-            "-o",
-            temp_path.resolve().as_posix(),
-        ]
+        ["-i", input_path.resolve().as_posix(), "-o", temp_path.resolve().as_posix(),]
     )
     logging.debug(" ".join(command))
 
@@ -186,7 +197,7 @@ def handbrake_convert(input_path: Path, temp_path: Path):
         encoding="utf-8",
     ) as proc:
         while True:
-            text = proc.stdout.readline()
+            text = proc.stdout.readline().rstrip("\n")
             if text == "":
                 if proc.poll() is None:
                     logging.debug("subprocess not exit, sleep 0.5s")
