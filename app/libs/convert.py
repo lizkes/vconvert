@@ -2,7 +2,6 @@ import subprocess
 import logging
 from pathlib import Path
 from time import sleep
-from shlex import quote
 
 from .path import get_file_format, rm
 from .info import get_video_json, match_codec
@@ -32,7 +31,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         "-loglevel",
         "info",
         "-i",
-        quote(input_path.resolve().as_posix()),
+        input_path.resolve().as_posix(),
         "-f",
         config["format"],
         "-movflags",
@@ -68,7 +67,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     if config["remove_subtitle"] == "true":
         command.extend(["-sn"])
 
-    command.append(quote(temp_path.resolve().as_posix()))
+    command.append(temp_path.resolve().as_posix())
     logging.debug(" ".join(command))
 
     # get video duration
@@ -78,18 +77,16 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     #     logging.debug(f"can't get duration from {input_path.as_posix()}, skip...")
     #     return
     # start convert
-    with subprocess.run(
+    with subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         bufsize=1,
         text=True,
         encoding="utf-8",
-        check=True,
-        shell=True,
     ) as proc:
         while True:
-            text = proc.stdout.readline().rstrip("\n")
+            text = proc.stdout.readline()
             if text == "":
                 if proc.poll() is None:
                     logging.debug("subprocess not exit, sleep 0.5s")
@@ -99,7 +96,6 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
                     logging.debug("subprocess exit, done")
                     break
             logging.debug(text)
-            print(text)
         # if proc.returncode != 0:
         #     raise subprocess.SubprocessError(
         #         "ffmpeg error, check log file for more information.")
@@ -174,25 +170,23 @@ def handbrake_convert(input_path: Path, temp_path: Path):
     command.extend(
         [
             "-i",
-            quote(input_path.resolve().as_posix()),
+            input_path.resolve().as_posix(),
             "-o",
-            quote(temp_path.resolve().as_posix()),
+            temp_path.resolve().as_posix(),
         ]
     )
     logging.debug(" ".join(command))
 
-    with subprocess.run(
+    with subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         bufsize=1,
         text=True,
         encoding="utf-8",
-        check=True,
-        shell=True,
     ) as proc:
         while True:
-            text = proc.stdout.readline().rstrip("\n")
+            text = proc.stdout.readline()
             if text == "":
                 if proc.poll() is None:
                     logging.debug("subprocess not exit, sleep 0.5s")
@@ -202,7 +196,6 @@ def handbrake_convert(input_path: Path, temp_path: Path):
                     logging.debug("subprocess exit, done")
                     break
             logging.debug(text)
-            print(text)
         # if proc.returncode != 0:
         #     raise subprocess.SubprocessError(
         #         "HandBrakeCLI error, check log file for more information.")

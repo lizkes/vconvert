@@ -1,6 +1,6 @@
 import shutil
 from os import _exit
-from logging import debug, warn, fatal
+from logging import debug, warn, fatal, info
 from pathlib import Path
 from time import sleep
 
@@ -59,7 +59,7 @@ def rm(path: Path):
                 else:
                     warn(f"{path} is not dir or file, can't delete.")
             else:
-                warn(f"{path} is not exist, can't delete.")
+                info(f"{path} is not exist, can't delete.")
             break
         except PermissionError as e:
             try_count -= 1

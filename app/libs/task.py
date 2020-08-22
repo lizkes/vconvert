@@ -93,7 +93,6 @@ class Tasks:
                 task.status = "waiting"
                 _exit(1)
             except Exception as e:
-                fatal(f"[{i + 1}/{len(executed_task_list)}]")
                 fatal(e)
                 rm(get_temp_path(task.path))
                 task.status = "error"

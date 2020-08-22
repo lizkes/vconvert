@@ -8,9 +8,9 @@ config = {
     # mp4|mkv
     "format": getenv("format", "mp4"),
     # h264|h265
-    "vc": getenv("vc", "h264"),
+    "vc": getenv("vc", "h265"),
     # acc|haac
-    "ac": getenv("ac", "aac"),
+    "ac": getenv("ac", "haac"),
     "input": getenv("vconvert_input", "/vconvert_input"),
     "temp": getenv("vconvert_temp", "/vconvert_temp"),
 }
