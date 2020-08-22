@@ -2,6 +2,7 @@ import subprocess
 import logging
 from pathlib import Path
 from time import sleep
+from shlex import quote
 
 from .path import get_file_format, rm
 from .info import get_video_json, match_codec
@@ -14,7 +15,7 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
     audio_index = match_codec(info, "audio", config["ac"])
 
     # check whether format is same
-    if get_file_format(input_path) == config["format"] and video_index and audio_index:
+    if get_file_format(input_path) == config["format"] and video_index is not None and audio_index is not None:
         logging.info("same format, nothing to do.")
         return
 
@@ -27,7 +28,7 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
         "-loglevel",
         "info",
         "-i",
-        input_path.as_posix(),
+        quote(input_path.resolve().as_posix()),
         "-f",
         config["format"],
         "-movflags",
@@ -63,7 +64,7 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
     if config["remove_subtitle"] == "true":
         command.extend(["-sn"])
 
-    command.append(output_path.as_posix())
+    command.append(quote(output_path.resolve().as_posix()))
     logging.debug(" ".join(command))
 
     # get video duration
@@ -153,7 +154,7 @@ def handbrake_convert(input_path: Path, output_path: Path):
             ]
         )
 
-    command.extend(["-i", input_path.as_posix(), "-o", output_path.as_posix()])
+    command.extend(["-i", quote(input_path.resolve().as_posix()), "-o", quote(output_path.resolve().as_posix())])
     logging.debug(" ".join(command))
 
     with subprocess.run(
