@@ -31,7 +31,7 @@ if __name__ == "__main__":
     )
 
     Path(config["input"]).mkdir(exist_ok=True)
-    Path(config["output"]).mkdir(exist_ok=True)
+    Path(config["temp"]).mkdir(exist_ok=True)
 
     tasks = Tasks()
 

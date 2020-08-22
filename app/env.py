@@ -12,5 +12,5 @@ config = {
     # acc|haac
     "ac": getenv("ac", "aac"),
     "input": getenv("vconvert_input", "/vconvert_input"),
-    "output": getenv("vconvert_output", "/vconvert_output"),
+    "temp": getenv("vconvert_temp", "/vconvert_temp"),
 }

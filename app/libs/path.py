@@ -7,28 +7,25 @@ from time import sleep
 from ..env import config
 
 
-def get_output_path(input_path: Path):
+def get_temp_path(input_path: Path):
     if input_path.is_file():
         return Path(
-            Path(config["output"]).joinpath(
-                change_file_format(input_path, config["format"]).relative_to(
-                    config["input"]
-                )
+            Path(config["temp"]).joinpath(
+                change_file_format(input_path, config["format"])
             )
         )
     elif input_path.is_dir():
         if input_path.name.upper() == "VIDEO_TS":
             return Path(
-                Path(config["output"]).joinpath(
-                    input_path.parent.relative_to(config["input"]),
+                Path(config["temp"]).joinpath(
                     f"{input_path.parent.name}.{config['format']}",
                 )
             )
         else:
-            fatal("输出路径是不支持的文件夹: ", input_path.as_posix())
+            fatal("输入路径是不支持的文件夹: ", input_path.resolve().as_posix())
             _exit(1)
     else:
-        fatal("输出路径既不是文件也不是文件夹: ", input_path.as_posix())
+        fatal("输入路径既不是文件也不是文件夹: ", input_path.resolve().as_posix())
         _exit(1)
 
 

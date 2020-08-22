@@ -5,7 +5,7 @@ from logging import debug, info, error, fatal
 
 from .time import strf_datetime
 from .convert import ffmpeg_convert, handbrake_convert
-from .path import get_output_path, rm
+from .path import rm, get_temp_path
 from ..env import config
 
 
@@ -19,16 +19,16 @@ class Task:
         self.status = "runing"
 
         input_path = self.path
-        output_path = get_output_path(input_path)
+        temp_path = get_temp_path(input_path)
 
         if self.ttype == "normal":
-            ffmpeg_convert(input_path, output_path)
+            ffmpeg_convert(input_path, temp_path)
         elif self.ttype == "dvd":
-            handbrake_convert(input_path, output_path)
+            handbrake_convert(input_path, temp_path)
         elif self.ttype == "dvd-folder":
-            handbrake_convert(input_path, output_path)
+            handbrake_convert(input_path, temp_path)
         elif self.ttype == "iso":
-            handbrake_convert(input_path, output_path)
+            handbrake_convert(input_path, temp_path)
         else:
             fatal(f"未知的task_type: {self.ttype}")
             _exit(10)
@@ -89,13 +89,13 @@ class Tasks:
                 task.execute()
             except KeyboardInterrupt:
                 info("\nUser stop tasks")
-                rm(get_output_path(task.path))
+                rm(get_temp_path(task.path))
                 task.status = "waiting"
                 _exit(1)
             except Exception as e:
                 fatal(f"[{i + 1}/{len(executed_task_list)}]")
                 fatal(e)
-                rm(get_output_path(task.path))
+                rm(get_temp_path(task.path))
                 task.status = "error"
                 _exit(10)
 

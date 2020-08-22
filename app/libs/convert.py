@@ -9,7 +9,7 @@ from .info import get_video_json, match_codec
 from ..env import config
 
 
-def ffmpeg_convert(input_path: Path, output_path: Path):
+def ffmpeg_convert(input_path: Path, temp_path: Path):
     info = get_video_json(input_path)
     video_index = match_codec(info, "video", config["vc"])
     audio_index = match_codec(info, "audio", config["ac"])
@@ -68,7 +68,7 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
     if config["remove_subtitle"] == "true":
         command.extend(["-sn"])
 
-    command.append(quote(output_path.resolve().as_posix()))
+    command.append(quote(temp_path.resolve().as_posix()))
     logging.debug(" ".join(command))
 
     # get video duration
@@ -112,13 +112,11 @@ def ffmpeg_convert(input_path: Path, output_path: Path):
         input_path.rename(input_path.resolve().as_posix() + ".source")
 
     # rename target file
-    dist_path = Path(config["output"]).joinpath(
-        output_path.relative_to(config["output"])
-    )
-    output_path.rename(dist_path)
+    dist_path = input_path.parent.joinpath(temp_path.name)
+    temp_path.rename(dist_path)
 
 
-def handbrake_convert(input_path: Path, output_path: Path):
+def handbrake_convert(input_path: Path, temp_path: Path):
     # build handbrake run command
     command = [
         "HandBrakeCLI",
@@ -177,7 +175,7 @@ def handbrake_convert(input_path: Path, output_path: Path):
             "-i",
             quote(input_path.resolve().as_posix()),
             "-o",
-            quote(output_path.resolve().as_posix()),
+            quote(temp_path.resolve().as_posix()),
         ]
     )
     logging.debug(" ".join(command))
@@ -216,10 +214,8 @@ def handbrake_convert(input_path: Path, output_path: Path):
         input_path.rename(input_path.resolve().as_posix() + ".source")
 
     # rename target file
-    dist_path = Path(config["output"]).joinpath(
-        output_path.relative_to(config["output"])
-    )
-    output_path.rename(dist_path)
+    dist_path = input_path.parent.joinpath(temp_path.name)
+    temp_path.rename(dist_path)
 
 
 # def uncompress(in_path_str, out_path_str):
