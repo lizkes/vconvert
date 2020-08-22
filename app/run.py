@@ -5,6 +5,7 @@ import logging.handlers
 from pathlib import Path
 from time import sleep
 
+from .env import config
 from .libs.task import Tasks
 from .libs.filter import filter_video
 
@@ -29,6 +30,9 @@ if __name__ == "__main__":
         ],
     )
 
+    Path(config["input"]).mkdir(exist_ok=True)
+    Path(config["output"]).mkdir(exist_ok=True)
+    
     tasks = Tasks()
 
     while True:
