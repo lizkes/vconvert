@@ -38,4 +38,5 @@ if __name__ == "__main__":
     while True:
         filter_video(tasks=tasks)
         tasks.execute_task()
+        # check tasks for every hour
         sleep(1 * 60 * 60)
