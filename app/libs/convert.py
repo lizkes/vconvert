@@ -86,6 +86,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         text=True,
         encoding="utf-8",
         check=True,
+        shell=True,
     ) as proc:
         while True:
             text = proc.stdout.readline().rstrip("\n")
@@ -188,6 +189,7 @@ def handbrake_convert(input_path: Path, temp_path: Path):
         text=True,
         encoding="utf-8",
         check=True,
+        shell=True,
     ) as proc:
         while True:
             text = proc.stdout.readline().rstrip("\n")

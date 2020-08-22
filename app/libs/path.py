@@ -11,7 +11,7 @@ def get_temp_path(input_path: Path):
     if input_path.is_file():
         return Path(
             Path(config["temp"]).joinpath(
-                change_file_format(input_path, config["format"])
+                change_file_format(input_path, config["format"]).name
             )
         )
     elif input_path.is_dir():
