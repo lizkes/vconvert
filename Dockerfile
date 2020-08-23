@@ -1,4 +1,4 @@
-FROM lizkes/ffmpeg_handbrake:1.0
+FROM lizkes/ffmpeg_handbrake:latest
 WORKDIR /usr/local/vconvert/
 COPY ./app/ ./app/
 ENV TZ=Asia/Shanghai
