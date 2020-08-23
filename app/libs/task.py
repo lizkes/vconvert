@@ -82,7 +82,9 @@ class Tasks:
             executed_task_list = self.task_list.copy()
 
         for i, task in enumerate(executed_task_list):
-            logging.info(f"[{i + 1}/{len(executed_task_list)}] Start Task: {task.path.resolve().as_posix()}")
+            logging.info(
+                f"[{i + 1}/{len(executed_task_list)}] Start Task: {task.path.resolve().as_posix()}"
+            )
 
             try:
                 task.execute()
@@ -98,6 +100,8 @@ class Tasks:
                 _exit(10)
 
             self.remove_task(i)
-            logging.info(f"[{i + 1}/{len(executed_task_list)}] Complete Task: {task.path.resolve().as_posix()}")
+            logging.info(
+                f"[{i + 1}/{len(executed_task_list)}] Complete Task: {task.path.resolve().as_posix()}"
+            )
 
         self.status = "wating"

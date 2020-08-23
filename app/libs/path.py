@@ -22,10 +22,14 @@ def get_temp_path(input_path: Path):
                 )
             )
         else:
-            logging.fatal(f"input_path is unsupported dir: {input_path.resolve().as_posix()}")
+            logging.fatal(
+                f"input_path is unsupported dir: {input_path.resolve().as_posix()}"
+            )
             _exit(1)
     else:
-        logging.fatal(f"input_path is neither a file nor a folder: {input_path.resolve().as_posix()}")
+        logging.fatal(
+            f"input_path is neither a file nor a folder: {input_path.resolve().as_posix()}"
+        )
         _exit(1)
 
 
