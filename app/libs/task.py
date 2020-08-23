@@ -15,6 +15,9 @@ class Task:
         self.ttype = ttype
         self.status = status
 
+    def __str__(self):
+        return f"{{path: {self.path}, ttype: {self.ttype}, status: {self.status}}}"
+
     def execute(self):
         self.status = "runing"
 
@@ -68,7 +71,7 @@ class Tasks:
             logging.error("Tasks are already run")
             return
 
-        logging.info(f"Start Tasks: {self.__str__()}")
+        logging.debug(f"Start Tasks: {self}")
         self.status = "running"
 
         executed_task_list = []
@@ -100,8 +103,6 @@ class Tasks:
                 _exit(10)
 
             self.remove_task(i)
-            logging.info(
-                f"[{i + 1}/{len(executed_task_list)}] Complete Task: {task.path.resolve().as_posix()}"
-            )
+            logging.info(f"Complete Task.")
 
         self.status = "wating"
