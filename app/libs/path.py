@@ -1,6 +1,6 @@
 import shutil
+import logging
 from os import _exit
-from logging import debug, warn, fatal, info
 from pathlib import Path
 from time import sleep
 
@@ -22,10 +22,10 @@ def get_temp_path(input_path: Path):
                 )
             )
         else:
-            fatal("输入路径是不支持的文件夹: ", input_path.resolve().as_posix())
+            logging.fatal(f"input_path is unsupported dir: {input_path.resolve().as_posix()}")
             _exit(1)
     else:
-        fatal("输入路径既不是文件也不是文件夹: ", input_path.resolve().as_posix())
+        logging.fatal(f"input_path is neither a file nor a folder: {input_path.resolve().as_posix()}")
         _exit(1)
 
 
@@ -57,11 +57,11 @@ def rm(path: Path):
                 elif path.is_file():
                     path.unlink()
                 else:
-                    warn(f"{path} is not dir or file, can't delete.")
+                    logging.warn(f"{path} is not dir or file, can't delete.")
             else:
-                info(f"{path} is not exist, can't delete.")
+                logging.info(f"{path} is not exist, can't delete.")
             break
         except PermissionError as e:
             try_count -= 1
-            debug("\n", e, "\nRetry after one second")
+            logging.debug("\n", e, "\nRetry after one second")
             sleep(1)

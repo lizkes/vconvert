@@ -1,7 +1,7 @@
+import logging
 from pathlib import Path
 from typing import List
 from os import _exit
-from logging import debug, info, error, fatal
 
 from .time import strf_datetime
 from .convert import ffmpeg_convert, handbrake_convert
@@ -30,7 +30,7 @@ class Task:
         elif self.ttype == "iso":
             handbrake_convert(input_path, temp_path)
         else:
-            fatal(f"未知的task_type: {self.ttype}")
+            logging.fatal(f"unknown task_type: {self.ttype}")
             _exit(10)
 
         self.status = "success"
@@ -65,10 +65,10 @@ class Tasks:
 
     def execute_task(self, index: int = None):
         if self.status == "running":
-            debug("任务已在执行，本次执行取消")
+            logging.error("Tasks are already run")
             return
 
-        debug("开始执行任务")
+        logging.info(f"Start Tasks: {self.__str__()}")
         self.status = "running"
 
         executed_task_list = []
@@ -82,24 +82,22 @@ class Tasks:
             executed_task_list = self.task_list.copy()
 
         for i, task in enumerate(executed_task_list):
-            info(f"[{i + 1}/{len(executed_task_list)}]")
-            info(f"Task Start: {task.path.resolve().as_posix()}")
+            logging.info(f"[{i + 1}/{len(executed_task_list)}] Start Task: {task.path.resolve().as_posix()}")
 
             try:
                 task.execute()
             except KeyboardInterrupt:
-                info("\nUser stop tasks")
+                logging.info("\nUser stop tasks")
                 rm(get_temp_path(task.path))
                 task.status = "waiting"
                 _exit(1)
             except Exception as e:
-                fatal(e)
+                logging.fatal(e)
                 rm(get_temp_path(task.path))
                 task.status = "error"
                 _exit(10)
 
             self.remove_task(i)
-            info(f"[{i + 1}/{len(executed_task_list)}]")
-            info(f"Task Done: {task.path.resolve().as_posix()}")
+            logging.info(f"[{i + 1}/{len(executed_task_list)}] Complete Task: {task.path.resolve().as_posix()}")
 
         self.status = "wating"

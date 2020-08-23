@@ -1,5 +1,6 @@
 import subprocess
 import logging
+from shutil import move
 from pathlib import Path
 from time import sleep
 
@@ -101,7 +102,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         command.extend(["-sn"])
 
     command.append(temp_path.resolve().as_posix())
-    logging.debug(" ".join(command))
+    logging.debug(f"execute command: {' '.join(command)}")
 
     # get video duration
     # try:
@@ -135,16 +136,20 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
             )
 
     # cleanup
+    input_path_str = input_path.resolve().as_posix()
     if config["remove_source"] == "true":
         # remove source file
         rm(input_path)
+        logging.info(f"Deleted source file {input_path_str}")
     else:
         # rename and keep source file
-        input_path.rename(input_path.resolve().as_posix() + ".source")
+        input_path.rename(input_path_str + ".source")
+        logging.info(f"Renamed source file {input_path_str} to {input_path_str}.source")
 
-    # rename target file
+    # move target file
     dist_path = input_path.parent.joinpath(temp_path.name)
-    temp_path.rename(dist_path)
+    move(temp_path, dist_path)
+    logging.info(f"move temp file {temp_path.absolute().as_posix()} to {dist_path.as_posix()}")
 
 
 def handbrake_convert(input_path: Path, temp_path: Path):
@@ -209,7 +214,7 @@ def handbrake_convert(input_path: Path, temp_path: Path):
     command.extend(
         ["-i", input_path.resolve().as_posix(), "-o", temp_path.resolve().as_posix(),]
     )
-    logging.debug(" ".join(command))
+    logging.debug(f"execute command: {' '.join(command)}")
 
     with subprocess.Popen(
         command,
@@ -235,17 +240,21 @@ def handbrake_convert(input_path: Path, temp_path: Path):
                 "HandBrakeCLI error, check log file for more information."
             )
 
+    input_path_str = input_path.resolve().as_posix()
     # cleanup
     if config["remove_source"] == "true":
         # remove source file
         rm(input_path)
+        logging.info(f"Deleted source file {input_path_str}")
     else:
         # rename and keep source file
         input_path.rename(input_path.resolve().as_posix() + ".source")
+        logging.info(f"Renamed source file {input_path_str} to {input_path_str}.source")
 
-    # rename target file
+    # move target file
     dist_path = input_path.parent.joinpath(temp_path.name)
-    temp_path.rename(dist_path)
+    move(temp_path, dist_path)
+    logging.info(f"move temp file {temp_path.absolute().as_posix()} to {dist_path.as_posix()}")
 
 
 # def uncompress(in_path_str, out_path_str):
