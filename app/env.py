@@ -17,4 +17,5 @@ config = {
     "ac": getenv("vconvert_ac", "aac"),
     "input": getenv("vconvert_input", "/vconvert_input"),
     "temp": getenv("vconvert_temp", "/vconvert_temp"),
+    "log_level": getenv("vconvert_log_level", "info"),
 }

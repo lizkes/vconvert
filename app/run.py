@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     # init logging
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging._nameToLevel.get(config["log_level"].upper(), logging.INFO),
         format="%(asctime)s [%(levelname)s] %(message)s",
         datefmt="%y/%m/%d %H:%M:%S",
         handlers=[
