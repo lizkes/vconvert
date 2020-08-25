@@ -298,15 +298,15 @@ def handbrake_convert(input_path: Path, temp_path: Path):
                 "HandBrakeCLI error, check log file for more information."
             )
 
-    input_path_str = input_path.resolve().as_posix()
     # cleanup
+    input_path_str = input_path.resolve().as_posix()
     if config["remove_source"] == "true":
         # remove source file
         rm(input_path)
         logging.info(f"Deleted source file {input_path_str}")
     else:
         # rename and keep source file
-        input_path.rename(input_path.resolve().as_posix() + ".source")
+        input_path.rename(input_path_str + ".source")
         logging.info(f"Renamed source file {input_path_str} to {input_path_str}.source")
 
     # move target file
