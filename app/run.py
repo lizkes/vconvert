@@ -20,7 +20,7 @@ if __name__ == "__main__":
         backupCount=5,
         encoding="utf-8",
     )
-    file_handler.setLevel(logging.debug)
+    file_handler.setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(
