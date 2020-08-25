@@ -140,6 +140,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         bufsize=1,
         text=True,
         encoding="utf-8",
+        errors="ignore",
     ) as proc:
         while True:
             text = proc.stdout.readline().rstrip("\n")
@@ -243,15 +244,15 @@ def handbrake_convert(input_path: Path, temp_path: Path):
             "18",
             "--encoder-preset",
             "medium",
-            "--align-av",
-            "--keep-display-aspect",
+            #"--align-av",
             "--auto-anamorphic",
-            "--maxHeight",
-            "1080",
-            "--maxWidth",
-            "1920",
+            "--keep-display-aspect",
+            # "--maxHeight",
+            # "1080",
+            # "--maxWidth",
+            # "1920",
             "--main-feature",
-            # "--first-audio",
+            "--first-audio",
         ]
     )
 
@@ -281,6 +282,7 @@ def handbrake_convert(input_path: Path, temp_path: Path):
         bufsize=1,
         text=True,
         encoding="utf-8",
+        errors="ignore",
     ) as proc:
         while True:
             text = proc.stdout.readline().rstrip("\n")

@@ -7,7 +7,10 @@
 ### 使用方法
 将下述指令的[input_dir]改为你想要转码的视频所在文件夹, [log_dir]改为你想要存储日志的文件夹, 运行.
 ```bash
-docker run -v [input_dir]:/vconvert_input -v [log_dir]:/usr/local/vconvert/app/logs/ -d lizkes/vconvert:latest
+docker run -d \
+    -v [input_dir]:/vconvert_input \
+    -v [log_dir]:/usr/local/vconvert/app/logs/ \
+    lizkes/vconvert:latest
 ```
 
 ### 环境变量
