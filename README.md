@@ -23,10 +23,10 @@ docker run -v [input_dir]:/vconvert_input -v [log_dir]:/usr/local/vconvert/app/l
 
 ### 示例
 ```bash
-docker run --name vconvert \
+docker run --name vconvert -d \
     -v /usr/local/transmission/download:/vconvert_input \
-    -v /var/log/vconvert/:/usr/local/vconvert/app/logs/ -d lizkes/ \
+    -v /var/log/vconvert/:/usr/local/vconvert/app/logs/ \
     -e "threads=8" \
     -e "remove_source=True" \
-    vconvert:latest
+    lizkes/vconvert:latest
 ```
