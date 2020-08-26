@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import List
 from os import _exit
+from enum import Enum
 
 from .time import strf_datetime
 from .convert import ffmpeg_convert, handbrake_convert
@@ -10,7 +11,7 @@ from ..env import config
 
 
 class Task:
-    def __init__(self, path: Path, ttype: str, status: str = "waiting"):
+    def __init__(self, path: Path, ttype: str, status = TaskStatus.Waiting):
         self.path = path
         self.ttype = ttype
         self.status = status
@@ -19,12 +20,18 @@ class Task:
         return f"{{path: {self.path}, ttype: {self.ttype}, status: {self.status}}}"
 
     def execute(self):
-        self.status = "runing"
+        if self.status == TaskStatus.Done:
+            logging.error(f"This task is already done, do nothing: {self}")
+            return
+        elif self.status == TaskStatus.Running:
+            logging.error("This task are already run, do nothing: {self}")
+            return
+        self.status = TaskStatus.Running
 
         input_path = self.path
         temp_path = get_temp_path(input_path)
         if temp_path is None:
-            self.status = "error"
+            self.status = TaskStatus.Error
             return
 
         if self.ttype == "normal":
@@ -36,12 +43,17 @@ class Task:
         elif self.ttype == "iso":
             handbrake_convert(input_path, temp_path)
         else:
-            logging.fatal(f"unknown task_type: {self.ttype}")
-            self.status = "error"
+            logging.error(f"unknown task_type: {self.ttype}")
+            self.status = TaskStatus.Error
             return
 
-        self.status = "success"
+        self.status = TaskStatus.Done
 
+class TaskStatus(Enum):
+    Waiting = "waiting"
+    Running = "running"
+    Done = "done"
+    Error = "error"
 
 class Tasks:
     def __init__(
@@ -49,20 +61,23 @@ class Tasks:
     ):
         temp_task_list: List[Task] = []
         for task in task_list:
-            if task.status != "error":
+            if task.status != TaskStatus.Error:
                 temp_task_list.append(task)
         self.task_list = temp_task_list
         self.create_time = create_time
-        self.status = "waiting"
+        self.status = TasksStatus.Waiting
 
     def __str__(self):
         return f"{{create_time: {self.create_time}, task_list: {self.task_list}}}"
 
     def add_task(self, task: Task):
+        #check if task is already exist in task_list
         for t in self.task_list:
             if t.path.resolve().as_posix() == task.path.resolve().as_posix():
                 return
+
         self.task_list.append(task)
+        self.status = TasksStatus.Waiting
 
     def remove_task(self, index: int = 0):
         try:
@@ -71,19 +86,23 @@ class Tasks:
             return
 
     def execute_task(self, index: int = None):
-        if self.status == "running":
-            logging.error("Tasks are already run")
+        if self.status == TasksStatus.Done:
+            logging.debug("No new tasks have been added, do nothing")
+            return
+        elif self.status == TasksStatus.Running:
+            logging.error("Tasks are already run, do nothing")
             return
 
         logging.debug(f"Start Tasks: {self}")
-        self.status = "running"
+        self.status = TasksStatus.Running
 
         executed_task_list = []
         if index:
             try:
                 executed_task_list.append(self.task_list[index])
             except IndexError:
-                self.status = "wating"
+                logging.error(f"Task {index} not found")
+                self.status = TasksStatus.Error
                 return
         else:
             executed_task_list = self.task_list.copy()
@@ -98,15 +117,21 @@ class Tasks:
             except KeyboardInterrupt:
                 logging.info("\nUser stop tasks")
                 rm(get_temp_path(task.path))
-                task.status = "waiting"
+                task.status = TaskStatus.Waiting
                 _exit(1)
             except Exception as e:
                 logging.fatal(e)
                 rm(get_temp_path(task.path))
-                task.status = "error"
+                task.status = TaskStatus.Error
                 _exit(10)
 
             self.remove_task(i)
             logging.info(f"Complete Task.")
 
-        self.status = "wating"
+        self.status = TasksStatus.Done
+
+class TasksStatus(Enum):
+    Waiting = "waiting"
+    Running = "running"
+    Done = "done"
+    Error = "error"
