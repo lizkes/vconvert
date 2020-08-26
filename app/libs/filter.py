@@ -37,13 +37,12 @@ def is_dvd_folder(dir_path: Path):
     vob_exist = False
     for child in dir_path.iterdir():
         file_format = get_file_format(child)
-        if file_format:
-            if file_format == "bup":
-                bup_exist == True
-            elif file_format == "ifo":
-                ifo_exist == True
-            elif file_format == "vob":
-                vob_exist == True
+        if file_format == "bup":
+            bup_exist = True
+        elif file_format == "ifo":
+            ifo_exist = True
+        elif file_format == "vob":
+            vob_exist = True
 
     return bup_exist and ifo_exist and vob_exist
 

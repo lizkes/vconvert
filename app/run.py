@@ -13,12 +13,11 @@ import os
 
 if __name__ == "__main__":
     current_path = Path(Path(__file__).parent).resolve()
-
+    log_path = current_path.joinpath("logs", "run.log")
+    if not log_path.exists:
+        log_path.mkdir()
     file_handler = logging.handlers.RotatingFileHandler(
-        Path(current_path).joinpath("logs", "run.log"),
-        maxBytes=4 * 1024 * 1024,
-        backupCount=5,
-        encoding="utf-8",
+        log_path, maxBytes=4 * 1024 * 1024, backupCount=5, encoding="utf-8",
     )
     file_handler.setLevel(logging.DEBUG)
 

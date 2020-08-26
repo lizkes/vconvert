@@ -33,6 +33,9 @@ class Task:
     def __str__(self):
         return f"{{path: {self.path}, ttype: {self.ttype}, status: {self.status}}}"
 
+    def __repr__(self):
+        return self.__str__()
+
     def execute(self):
         if self.status == TaskStatus.Done:
             logging.error(f"This task is already done, do nothing: {self}")
@@ -92,9 +95,10 @@ class Tasks:
         try:
             self.task_list.pop(index)
         except IndexError:
+            logging.error(f"Fail to remove task, index {index} is out of range")
             return
 
-    def execute_task(self, index: int = None):
+    def execute_task(self, index_list: List[int] = []):
         if self.status == TasksStatus.Done:
             logging.debug("No new tasks have been added, do nothing")
             return
@@ -106,15 +110,16 @@ class Tasks:
         self.status = TasksStatus.Running
 
         executed_task_list = []
-        if index:
-            try:
-                executed_task_list.append(self.task_list[index])
-            except IndexError:
-                logging.error(f"Task {index} not found")
-                self.status = TasksStatus.Error
-                return
-        else:
+        if index_list == []:
             executed_task_list = self.task_list.copy()
+        else:
+            for index in index_list:
+                try:
+                    executed_task_list.append(self.task_list[index])
+                except IndexError:
+                    logging.error(f"Task {index} not found")
+                    self.status = TasksStatus.Error
+                    return
 
         for i, task in enumerate(executed_task_list):
             logging.info(
@@ -134,7 +139,6 @@ class Tasks:
                 task.status = TaskStatus.Error
                 _exit(10)
 
-            self.remove_task(i)
             logging.info(f"Complete Task.")
 
         self.status = TasksStatus.Done
