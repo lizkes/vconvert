@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(
-        logging._nameToLevel.get(config["log_level"].upper(), logging.INFO)
+        logging._nameToLevel.get(config["log_level"], logging.INFO)
     )
     # init logging
     logging.basicConfig(

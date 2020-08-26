@@ -2,20 +2,20 @@ from os import getenv
 
 config = {
     # only for ffmpeg
-    "threads": getenv("threads", None),
-    "remove_source": getenv("remove_source", "false"),
-    "remove_subtitle": getenv("remove_subtitle", "false"),
+    "threads": (getenv("threads", "0"),
+    "remove_source": getenv("remove_source", "false").lower(),
+    "remove_subtitle": getenv("remove_subtitle", "false").lower(),
     # mp4|mkv|webm
-    "format": getenv("format", "mp4"),
+    "format": getenv("format", "mp4").lower(),
     # h264|h265|vp9
-    "vc": getenv("vc", "h264"),
+    "vc": getenv("vc", "h264").lower(),
     # aac|opus
     # aac don't support webm
-    "ac": getenv("ac", "aac"),
+    "ac": getenv("ac", "aac").lower(),
     # 8|10
     # don't support vp9
     "bit": getenv("bit", "8"),
-    "input": getenv("input", "/vconvert_input"),
-    "temp": getenv("temp", "/vconvert_temp"),
-    "log_level": getenv("log_level", "INFO"),
+    "input": getenv("input", "/vconvert_input").lower(),
+    "temp": getenv("temp", "/vconvert_temp").lower(),
+    "log_level": getenv("log_level", "INFO").upper(),
 }

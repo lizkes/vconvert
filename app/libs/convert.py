@@ -45,7 +45,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     elif config["format"] == "webm":
         command.extend(["-f", "webm"])
 
-    if config["threads"]:
+    if config["threads"] != "0":
         command.extend(["-threads", config["threads"]])
 
     # pix_fmt: yuv420p yuv422p yuv444p yuvj420p yuvj422p yuvj444p yuv420p10le yuv422p10le yuv444p10le
