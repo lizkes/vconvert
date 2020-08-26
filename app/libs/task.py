@@ -49,13 +49,13 @@ class Task:
             return
 
         if self.ttype == "normal":
-            ffmpeg_convert(input_path, temp_path)
+            self.path = ffmpeg_convert(input_path, temp_path)
         elif self.ttype == "dvd":
-            handbrake_convert(input_path, temp_path)
+            self.path = handbrake_convert(input_path, temp_path)
         elif self.ttype == "dvd-folder":
-            handbrake_convert(input_path, temp_path)
+            self.path = handbrake_convert(input_path, temp_path)
         elif self.ttype == "iso":
-            handbrake_convert(input_path, temp_path)
+            self.path = handbrake_convert(input_path, temp_path)
         else:
             logging.error(f"unknown task_type: {self.ttype}")
             self.status = TaskStatus.Error

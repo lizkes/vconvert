@@ -22,7 +22,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         and audio_index is not None
     ):
         logging.info("same format, nothing to do.")
-        return
+        return input_path
 
     # build ffmpeg run command
     # sn mean not subtitle stream
@@ -183,6 +183,8 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
+    return Path(dist_path)
+
 
 def handbrake_convert(input_path: Path, temp_path: Path):
     # build handbrake run command
@@ -331,6 +333,8 @@ def handbrake_convert(input_path: Path, temp_path: Path):
     dist_path = input_path.parent.joinpath(temp_path.name)
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
+
+    return Path(dist_path)
 
 
 # def uncompress(in_path_str, out_path_str):
