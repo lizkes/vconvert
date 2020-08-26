@@ -26,19 +26,26 @@ SUPPORT_NORMAL_SUFFIXES = [
 SUPPORT_DVD_SUFFIXES = ["m2ts", "mts", "ts", "avchd"]
 SUPPORT_ISO_SUFFIXES = ["iso"]
 # VIDEO_SUFFIXES = ["yuv", "wmv", "webm", "vob", "svi", "roq", "rmvb", "rm", "ogv", "ogg", "nsv", "mxf", "ts", "mpg", "mpeg", "m2v", "mp2", "mpe", "mpv", "mp4", "m4p", "m4v", "mov", "qt", "mng", "mkv", "flv", "f4v", "f4p", "f4a", "f4b", "drc", "avi", "asf", "amv", "3gp", "3g2", "mxf", "m2p", "ps", "m2ts", "mts", "iso", "avchd", "swf"]
-# SUPPORT_DVD_FOLDER_SUFFIXES = ["bup", "ifo", "vob"]
 
 
-def traverse(dir_path: Path, tasks):
+def is_dvd_folder(dir_path: Path):
     if dir_path.name.upper() == "VIDEO_TS":
-        tasks.add_task(Task(dir_path, "dvd-folder"))
-        return
+        return True
 
+    bup_exist = False
+    ifo_exist = False
+    vob_exist = False
     for child in dir_path.iterdir():
-        if child.is_file():
-            filter_file(child, tasks)
-        elif child.is_dir():
-            traverse(child, tasks)
+        file_format = get_file_format(child)
+        if file_format:
+            if file_format == "bup":
+                bup_exist == True
+            elif file_format == "ifo":
+                ifo_exist == True
+            elif file_format == "vob":
+                vob_exist == True
+
+    return bup_exist and ifo_exist and vob_exist
 
 
 def filter_file(file_path: Path, tasks: Tasks):
@@ -61,6 +68,18 @@ def filter_file(file_path: Path, tasks: Tasks):
         # if suffix.lower() in SUPPORT_DVD_FOLDER_SUFFIXES:
         #     tasks.add_task([file_path.parent.as_posix(), "dvd_folder", 0])
         #     return "dvd_folder"
+
+
+def traverse(dir_path: Path, tasks):
+    if is_dvd_folder(dir_path):
+        tasks.add_task(Task(dir_path, "dvd-folder"))
+        return
+
+    for child in dir_path.iterdir():
+        if child.is_file():
+            filter_file(child, tasks)
+        elif child.is_dir():
+            traverse(child, tasks)
 
 
 # filter video file

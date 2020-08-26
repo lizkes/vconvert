@@ -9,17 +9,20 @@ from .convert import ffmpeg_convert, handbrake_convert
 from .path import rm, get_temp_path
 from ..env import config
 
+
 class TaskStatus(Enum):
     Waiting = "waiting"
     Running = "running"
     Done = "done"
     Error = "error"
 
+
 class TasksStatus(Enum):
     Waiting = "waiting"
     Running = "running"
     Done = "done"
     Error = "error"
+
 
 class Task:
     def __init__(self, path: Path, ttype: str, status=TaskStatus.Waiting):
