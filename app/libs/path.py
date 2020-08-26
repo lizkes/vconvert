@@ -21,10 +21,11 @@ def get_temp_path(input_path: Path):
                 )
             )
         else:
-            logging.error(
-                f"input_path is unsupported dir: {input_path.resolve().as_posix()}"
+            return Path(
+                Path(config["temp"]).joinpath(
+                    f"{input_path.name}.{config['format']}",
+                )
             )
-            return None
     else:
         logging.error(
             f"input_path is neither a file nor a folder: {input_path.resolve().as_posix()}"
