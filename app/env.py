@@ -2,7 +2,7 @@ from os import getenv
 
 config = {
     # only for ffmpeg
-    "threads": (getenv("threads", "0"),
+    "threads": getenv("threads", "0"),
     "remove_source": getenv("remove_source", "false").lower(),
     "remove_subtitle": getenv("remove_subtitle", "false").lower(),
     # mp4|mkv|webm
