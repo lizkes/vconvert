@@ -142,6 +142,8 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
         encoding="utf-8",
         errors="ignore",
     ) as proc:
+        log_count = 120
+        log_interval = 120
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
@@ -152,7 +154,14 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
                 else:
                     logging.debug("subprocess exit, done")
                     break
-            logging.debug(text)
+            elif text.startswith("frame="):
+                if log_count == log_interval:
+                    log_count = 0
+                    logging.debug(text)
+                else:
+                    log_count += 1
+            else:
+                logging.debug(text)
         if proc.returncode != 0:
             raise subprocess.SubprocessError(
                 "ffmpeg error, check log file for more information."
@@ -282,6 +291,8 @@ def handbrake_convert(input_path: Path, temp_path: Path):
         encoding="utf-8",
         errors="ignore",
     ) as proc:
+        log_count = 120
+        log_interval = 120
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
@@ -292,7 +303,14 @@ def handbrake_convert(input_path: Path, temp_path: Path):
                 else:
                     logging.debug("subprocess exit, done")
                     break
-            logging.debug(text)
+            elif text.startswith("frame="):
+                if log_count == log_interval:
+                    log_count = 0
+                    logging.debug(text)
+                else:
+                    log_count += 1
+            else:
+                logging.debug(text)
         if proc.returncode != 0:
             raise subprocess.SubprocessError(
                 "HandBrakeCLI error, check log file for more information."
