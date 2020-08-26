@@ -23,6 +23,9 @@ class Task:
 
         input_path = self.path
         temp_path = get_temp_path(input_path)
+        if temp_path is None:
+            self.status = "error"
+            return
 
         if self.ttype == "normal":
             ffmpeg_convert(input_path, temp_path)
@@ -34,7 +37,8 @@ class Task:
             handbrake_convert(input_path, temp_path)
         else:
             logging.fatal(f"unknown task_type: {self.ttype}")
-            _exit(10)
+            self.status = "error"
+            return
 
         self.status = "success"
 

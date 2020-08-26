@@ -1,6 +1,5 @@
 import shutil
 import logging
-from os import _exit
 from pathlib import Path
 from time import sleep
 
@@ -22,15 +21,15 @@ def get_temp_path(input_path: Path):
                 )
             )
         else:
-            logging.fatal(
+            logging.error(
                 f"input_path is unsupported dir: {input_path.resolve().as_posix()}"
             )
-            _exit(1)
+            return None
     else:
-        logging.fatal(
+        logging.error(
             f"input_path is neither a file nor a folder: {input_path.resolve().as_posix()}"
         )
-        _exit(1)
+        return None
 
 
 def get_file_format(input_path: Path):
