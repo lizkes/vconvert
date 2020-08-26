@@ -167,14 +167,12 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     else:
         # rename and keep source file
         input_path.rename(input_path_str + ".source")
-        logging.info(f"Renamed source file {input_path_str} to {input_path_str}.source")
+        logging.info(f"Renamed source file to {input_path_str}.source")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name)
     move(temp_path, dist_path)
-    logging.info(
-        f"move temp file {temp_path.absolute().as_posix()} to {dist_path.as_posix()}"
-    )
+    logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
 
 def handbrake_convert(input_path: Path, temp_path: Path):
@@ -244,7 +242,7 @@ def handbrake_convert(input_path: Path, temp_path: Path):
             "18",
             "--encoder-preset",
             "medium",
-            #"--align-av",
+            # "--align-av",
             "--auto-anamorphic",
             "--keep-display-aspect",
             # "--maxHeight",
@@ -309,14 +307,12 @@ def handbrake_convert(input_path: Path, temp_path: Path):
     else:
         # rename and keep source file
         input_path.rename(input_path_str + ".source")
-        logging.info(f"Renamed source file {input_path_str} to {input_path_str}.source")
+        logging.info(f"Renamed source file to {input_path_str}.source")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name)
     move(temp_path, dist_path)
-    logging.info(
-        f"move temp file {temp_path.absolute().as_posix()} to {dist_path.as_posix()}"
-    )
+    logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
 
 # def uncompress(in_path_str, out_path_str):

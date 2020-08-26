@@ -11,7 +11,7 @@ from ..env import config
 
 
 class Task:
-    def __init__(self, path: Path, ttype: str, status = TaskStatus.Waiting):
+    def __init__(self, path: Path, ttype: str, status=TaskStatus.Waiting):
         self.path = path
         self.ttype = ttype
         self.status = status
@@ -49,11 +49,13 @@ class Task:
 
         self.status = TaskStatus.Done
 
+
 class TaskStatus(Enum):
     Waiting = "waiting"
     Running = "running"
     Done = "done"
     Error = "error"
+
 
 class Tasks:
     def __init__(
@@ -71,7 +73,7 @@ class Tasks:
         return f"{{create_time: {self.create_time}, task_list: {self.task_list}}}"
 
     def add_task(self, task: Task):
-        #check if task is already exist in task_list
+        # check if task is already exist in task_list
         for t in self.task_list:
             if t.path.resolve().as_posix() == task.path.resolve().as_posix():
                 return
@@ -129,6 +131,7 @@ class Tasks:
             logging.info(f"Complete Task.")
 
         self.status = TasksStatus.Done
+
 
 class TasksStatus(Enum):
     Waiting = "waiting"
