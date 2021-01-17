@@ -6,7 +6,7 @@ from time import sleep
 from ..env import config
 
 
-def get_temp_path(input_path: Path):
+def get_temp_path(input_path):
     if input_path.is_file():
         return Path(
             Path(config["temp"]).joinpath(
@@ -33,7 +33,7 @@ def get_temp_path(input_path: Path):
         return None
 
 
-def get_file_format(input_path: Path):
+def get_file_format(input_path):
     if input_path.is_file():
         suffixes = input_path.suffixes
         if len(suffixes) > 0:
@@ -43,7 +43,7 @@ def get_file_format(input_path: Path):
     return None
 
 
-def change_file_format(input_path: Path, format: str):
+def change_file_format(input_path, format):
     if input_path.is_file():
         suffix = input_path.suffix
         if suffix:
@@ -51,7 +51,7 @@ def change_file_format(input_path: Path, format: str):
     return input_path
 
 
-def rm(path: Path):
+def rm(path):
     try_count = 10
     while try_count > 0:
         try:

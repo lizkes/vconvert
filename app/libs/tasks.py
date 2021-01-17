@@ -16,7 +16,7 @@ class TasksStatus(Enum):
 
 class Tasks:
     def __init__(
-        self, task_list: List[Task] = [], mode=config["mode"], create_time=strf_datetime(),
+        self, task_list=[], mode=config["mode"], create_time=strf_datetime(),
     ):
         self.create_time = create_time
         self.mode = mode
@@ -36,7 +36,7 @@ class Tasks:
         self.task_list.append(task)
         self.status = TasksStatus.Waiting
 
-    def remove_task(self, index: int = 0):
+    def remove_task(self, index=0):
         try:
             self.task_list.pop(index)
         except IndexError:
@@ -44,7 +44,7 @@ class Tasks:
                 f"Fail to remove task, index {index} is out of range")
             return
 
-    def execute_task(self, index: str = "0"):
+    def execute_task(self, start_index=0, end_index=0):
         if self.mode == "transcoding":
             from ..libs import transcoding_filter
 
@@ -64,13 +64,10 @@ class Tasks:
         self.status = TasksStatus.Running
 
         executed_task_list = []
-        if index == "0":
+        if start_index >= end_index:
             if executed_task_list != self.task_list:
                 executed_task_list = self.task_list.copy()
         else:
-            index_list = index.split(",")
-            start_index = int(index_list[0])
-            end_index = int(index_list[1])
             try:
                 executed_task_list.extend(
                     self.task_list[start_index:end_index])

@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   vconvert:
-    image: lizkes/vconvert:latest
+    image: .
     container_name: vconvert
     volumes:
       # input dir

@@ -5,7 +5,7 @@ from .json import str_parse_json
 
 
 class Info:
-    def __init__(self, path: Path):
+    def __init__(self, path):
         result = subprocess.run(
             [
                 "ffprobe",

@@ -27,7 +27,7 @@ SUPPORT_NORMAL_SUFFIXES = [
 # VIDEO_SUFFIXES = ["yuv", "wmv", "webm", "vob", "svi", "roq", "rmvb", "rm", "ogv", "ogg", "nsv", "mxf", "ts", "mpg", "mpeg", "m2v", "mp2", "mpe", "mpv", "mp4", "m4p", "m4v", "mov", "qt", "mng", "mkv", "flv", "f4v", "f4p", "f4a", "f4b", "drc", "avi", "asf", "amv", "3gp", "3g2", "mxf", "m2p", "ps", "m2ts", "mts", "iso", "avchd", "swf"]
 
 
-def filter_file(file_path: Path, tasks: Tasks):
+def filter_file(file_path, tasks):
     file_format = get_file_format(file_path)
     if file_format in SUPPORT_NORMAL_SUFFIXES:
         srt_file_path = Path(file_path.with_suffix(".srt"))
@@ -41,7 +41,7 @@ def filter_file(file_path: Path, tasks: Tasks):
             return
 
 
-def traverse(dir_path: Path, tasks):
+def traverse(dir_path, tasks):
     for child in dir_path.iterdir():
         if child.is_file():
             filter_file(child, tasks)
@@ -50,7 +50,7 @@ def traverse(dir_path: Path, tasks):
 
 
 # filter video file
-def filter(path: Path = Path(config["input"]), tasks: Tasks = Tasks()):
+def filter(path=Path(config["input"]), tasks=Tasks()):
     if path.is_file():
         filter_file(path, tasks)
     elif path.is_dir():

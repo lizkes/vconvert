@@ -9,7 +9,7 @@ from .info import Info
 from ..env import config
 
 
-def ffmpeg_convert(input_path: Path, temp_path: Path):
+def ffmpeg_convert(input_path, temp_path):
     info = Info(input_path)
     video_index = info.match_video_codec(config["vc"])
     audio_index = info.match_audio_codec(config["ac"])
@@ -193,7 +193,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     return Path(dist_path)
 
 
-def handbrake_convert(input_path: Path, temp_path: Path):
+def handbrake_convert(input_path, temp_path):
     # build handbrake run command
     command = [
         "handbrake",

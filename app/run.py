@@ -46,4 +46,7 @@ if __name__ == "__main__":
             tasks.execute_task()
             sleep(float(config["sleep_time"]))
     else:
-        tasks.execute_task(config["execute_index"])
+        index_list = config["execute_index"].split(",")
+        start_index = int(index_list[0])
+        end_index = int(index_list[1])
+        tasks.execute_task(start_index, end_index)

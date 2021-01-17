@@ -8,7 +8,7 @@ from .path import rm
 from ..env import config
 
 
-def burn_sub(input_path: Path, sub_path: Path, sub_format: str, temp_path: Path):
+def burn_sub(input_path, sub_path, sub_format, temp_path):
     input_path_str = input_path.resolve().as_posix()
 
     if sub_format == "srt":

@@ -29,7 +29,7 @@ SUPPORT_ISO_SUFFIXES = ["iso"]
 # VIDEO_SUFFIXES = ["yuv", "wmv", "webm", "vob", "svi", "roq", "rmvb", "rm", "ogv", "ogg", "nsv", "mxf", "ts", "mpg", "mpeg", "m2v", "mp2", "mpe", "mpv", "mp4", "m4p", "m4v", "mov", "qt", "mng", "mkv", "flv", "f4v", "f4p", "f4a", "f4b", "drc", "avi", "asf", "amv", "3gp", "3g2", "mxf", "m2p", "ps", "m2ts", "mts", "iso", "avchd", "swf"]
 
 
-def is_dvd_folder(dir_path: Path):
+def is_dvd_folder(dir_path):
     if dir_path.name.upper() == "VIDEO_TS":
         return True
 
@@ -48,7 +48,7 @@ def is_dvd_folder(dir_path: Path):
     return bup_exist and ifo_exist and vob_exist
 
 
-def filter_file(file_path: Path, tasks: Tasks):
+def filter_file(file_path, tasks):
     file_format = get_file_format(file_path)
     if file_format:
         # if suffix not in VIDEO_SUFFIXES and suffix.lower() in VIDEO_SUFFIXES:
@@ -70,7 +70,7 @@ def filter_file(file_path: Path, tasks: Tasks):
         #     return "dvd_folder"
 
 
-def traverse(dir_path: Path, tasks):
+def traverse(dir_path, tasks):
     if is_dvd_folder(dir_path):
         tasks.add_task(TranscodingTask(dir_path, "dvd-folder"))
         return
@@ -83,7 +83,7 @@ def traverse(dir_path: Path, tasks):
 
 
 # filter video file
-def filter(path: Path = Path(config["input"]), tasks: Tasks = Tasks()):
+def filter(path=Path(config["input"]), tasks=Tasks()):
     if path.is_file():
         filter_file(path, tasks)
     elif path.is_dir():

@@ -16,7 +16,7 @@ class TaskStatus(Enum):
 
 
 class Task(ABC):
-    def __init__(self, path: Path, status=TaskStatus.Waiting):
+    def __init__(self, path, status=TaskStatus.Waiting):
         self.path = path
         self.status = status
 
@@ -42,7 +42,7 @@ class Task(ABC):
 
 
 class TranscodingTask(Task):
-    def __init__(self, path: Path, ttype: str, status=TaskStatus.Waiting):
+    def __init__(self, path, ttype, status=TaskStatus.Waiting):
         super().__init__(path, status)
         self.ttype = ttype
 
@@ -84,7 +84,7 @@ class TranscodingTask(Task):
 
 
 class BurnsubTask(Task):
-    def __init__(self, path: Path, sub_path: Path, ttype: str, status=TaskStatus.Waiting):
+    def __init__(self, path, sub_path, ttype, status=TaskStatus.Waiting):
         super().__init__(path, status)
         self.sub_path = sub_path
         self.ttype = ttype
