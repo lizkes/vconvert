@@ -7,7 +7,7 @@ from pathlib import Path, PurePath
 from time import sleep
 
 from .env import config
-from .libs.task import Tasks
+from .libs.tasks import Tasks
 
 import os
 

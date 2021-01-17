@@ -1,6 +1,7 @@
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from os import _exit
+from enum import Enum
 from pathlib import Path
 from .transcoding_convert import ffmpeg_convert, handbrake_convert
 from .burnsub_convert import burn_sub
