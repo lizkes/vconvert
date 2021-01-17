@@ -6,7 +6,7 @@ config = {
     "execute_index": getenv("execute_index", "0"),
     # only for ffmpeg
     "threads": getenv("threads", "0"),
-    "remove_source": getenv("remove_source", "false").lower(),
+    "remove_origin": getenv("remove_origin", "false").lower(),
     "remove_subtitle": getenv("remove_subtitle", "false").lower(),
     # mp4|mkv|webm
     "format": getenv("format", "mp4").lower(),

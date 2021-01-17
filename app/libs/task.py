@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 from os import _exit
 from enum import Enum
 from pathlib import Path
-from .transcoding_convert import ffmpeg_convert, handbrake_convert
-from .burnsub_convert import burn_sub
+from .converter import ffmpeg_convert, handbrake_convert, burn_sub
 from .path import rm, get_temp_path
 
 
@@ -50,7 +49,7 @@ class TranscodingTask(Task):
         return f"{{path: {self.path}, type: {self.ttype}, status: {self.status}}}"
 
     def execute(self):
-        if (super().execute() == 1):
+        if super().execute() == 1:
             return
 
         input_path = self.path
@@ -72,12 +71,12 @@ class TranscodingTask(Task):
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(get_temp_path(self.path))
-            task.status = TaskStatus.Waiting
+            self.status = TaskStatus.Waiting
             _exit(1)
         except Exception as e:
             logging.error(e)
             rm(get_temp_path(self.path))
-            task.status = TaskStatus.Error
+            self.status = TaskStatus.Error
             _exit(2)
 
         self.status = TaskStatus.Done
@@ -93,7 +92,7 @@ class BurnsubTask(Task):
         return f"{{path: {self.path}, sub_path: {self.sub_path}, type: {self.ttype}, status: {self.status}}}"
 
     def execute(self):
-        if (super().execute() == 1):
+        if super().execute() == 1:
             return
 
         input_path = self.path
@@ -114,12 +113,12 @@ class BurnsubTask(Task):
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(get_temp_path(self.path))
-            task.status = TaskStatus.Waiting
+            self.status = TaskStatus.Waiting
             _exit(1)
         except Exception as e:
             logging.error(e)
             rm(get_temp_path(self.path))
-            task.status = TaskStatus.Error
+            self.status = TaskStatus.Error
             _exit(2)
 
         self.status = TaskStatus.Done

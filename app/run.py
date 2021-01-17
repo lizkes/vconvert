@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     tasks = Tasks()
 
-    if (config["execute_index"] == "0"):
+    if config["execute_index"] == "0":
         while True:
             tasks.execute_task()
             sleep(float(config["sleep_time"]))

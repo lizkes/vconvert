@@ -46,13 +46,13 @@ class Tasks:
 
     def execute_task(self, start_index=0, end_index=0):
         if self.mode == "transcoding":
-            from ..libs import transcoding_filter
+            from .filter import TranscodingFilter
 
-            transcoding_filter.filter(tasks=self)
+            TranscodingFilter().filte(tasks=self)
         elif self.mode == "burnsub":
-            from ..libs import burnsub_filter
+            from .filter import BurnsubFilter
 
-            burnsub_filter.filter(tasks=self)
+            BurnsubFilter().filte(tasks=self)
 
         if self.status == TasksStatus.Done:
             logging.debug("No new tasks have been added, do nothing")
