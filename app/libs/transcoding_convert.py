@@ -1,8 +1,8 @@
 import subprocess
 import logging
+from time import sleep
 from shutil import move
 from pathlib import Path
-from time import sleep
 
 from .path import get_file_format, rm
 from .info import Info
@@ -57,18 +57,24 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
             )
             if config["bit"] == "8":
                 if pix_fmt == "yuv420p":
-                    command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
+                    command.extend(
+                        ["-profile:v", "high", "-pix_fmt", "yuv420p"])
                 elif pix_fmt == "yuv422p":
-                    command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p"])
+                    command.extend(
+                        ["-profile:v", "high422", "-pix_fmt", "yuv422p"])
                 elif pix_fmt == "yuv444p":
-                    command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p"])
+                    command.extend(
+                        ["-profile:v", "high444", "-pix_fmt", "yuv444p"])
             if config["bit"] == "10":
                 if pix_fmt == "yuv420p":
-                    command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
+                    command.extend(
+                        ["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
                 elif pix_fmt == "yuv422p":
-                    command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p10le"])
+                    command.extend(
+                        ["-profile:v", "high422", "-pix_fmt", "yuv422p10le"])
                 elif pix_fmt == "yuv444p":
-                    command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
+                    command.extend(
+                        ["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
         elif config["vc"] == "h265":
             command.extend(
                 [
@@ -132,6 +138,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
     # except KeyError:
     #     logging.debug(f"can't get duration from {input_path.as_posix()}, skip...")
     #     return
+
     # start convert
     with subprocess.Popen(
         command,
@@ -189,7 +196,7 @@ def ffmpeg_convert(input_path: Path, temp_path: Path):
 def handbrake_convert(input_path: Path, temp_path: Path):
     # build handbrake run command
     command = [
-        "HandBrakeCLI",
+        "handbrake",
         "--format",
         f"av_{config['format']}",
         "-r",
@@ -266,7 +273,8 @@ def handbrake_convert(input_path: Path, temp_path: Path):
     )
 
     if config["ac"] == "aac":
-        command.extend(["--aencoder", "copy:aac", "--audio-fallback", "ca_haac"])
+        command.extend(["--aencoder", "copy:aac",
+                        "--audio-fallback", "ca_haac"])
     elif config["ac"] == "opus":
         command.extend(["--aencoder", "opus"])
     command.extend(["--aq", "8"])
@@ -280,7 +288,8 @@ def handbrake_convert(input_path: Path, temp_path: Path):
         )
 
     command.extend(
-        ["-i", input_path.resolve().as_posix(), "-o", temp_path.resolve().as_posix(),]
+        ["-i", input_path.resolve().as_posix(), "-o",
+         temp_path.resolve().as_posix(), ]
     )
     logging.debug(f"execute command: {' '.join(command)}")
 
@@ -315,7 +324,7 @@ def handbrake_convert(input_path: Path, temp_path: Path):
                 logging.debug(text)
         if proc.returncode != 0:
             raise subprocess.SubprocessError(
-                "HandBrakeCLI error, check log file for more information."
+                "handbrake error, check log file for more information."
             )
 
     # cleanup

@@ -1,13 +1,10 @@
 import logging
-from pathlib import Path
-from typing import List
+from abc import ABC
 from os import _exit
-from enum import Enum
-
-from .time import strf_datetime
-from .convert import ffmpeg_convert, handbrake_convert
+from pathlib import Path
+from .transcoding_convert import ffmpeg_convert, handbrake_convert
+from .burnsub_convert import burn_sub
 from .path import rm, get_temp_path
-from ..env import config
 
 
 class TaskStatus(Enum):
@@ -17,128 +14,111 @@ class TaskStatus(Enum):
     Error = "error"
 
 
-class TasksStatus(Enum):
-    Waiting = "waiting"
-    Running = "running"
-    Done = "done"
-    Error = "error"
-
-
-class Task:
-    def __init__(self, path: Path, ttype: str, status=TaskStatus.Waiting):
+class Task(ABC):
+    def __init__(self, path: Path, status=TaskStatus.Waiting):
         self.path = path
-        self.ttype = ttype
         self.status = status
 
     def __str__(self):
-        return f"{{path: {self.path}, ttype: {self.ttype}, status: {self.status}}}"
+        return f"{{path: {self.path}, status: {self.status}}}"
 
     def __repr__(self):
         return self.__str__()
 
+    @abstractmethod
     def execute(self):
         if self.status == TaskStatus.Done:
             logging.error(f"This task is already done, do nothing: {self}")
-            return
+            return 1
         elif self.status == TaskStatus.Running:
-            logging.error("This task are already run, do nothing: {self}")
-            return
+            logging.error("This task is already running, do nothing: {self}")
+            return 1
+        elif self.status == TaskStatus.Error:
+            logging.error("This task is error, do nothing: {self}")
+            return 1
+
         self.status = TaskStatus.Running
+
+
+class TranscodingTask(Task):
+    def __init__(self, path: Path, ttype: str, status=TaskStatus.Waiting):
+        super().__init__(path, status)
+        self.ttype = ttype
+
+    def __str__(self):
+        return f"{{path: {self.path}, type: {self.ttype}, status: {self.status}}}"
+
+    def execute(self):
+        if (super().execute() == 1):
+            return
 
         input_path = self.path
         temp_path = get_temp_path(input_path)
         if temp_path is None:
+            logging.error("can not find temp_path: {self}")
             self.status = TaskStatus.Error
             return
 
-        if self.ttype == "normal":
-            self.path = ffmpeg_convert(input_path, temp_path)
-        elif self.ttype == "dvd":
-            self.path = handbrake_convert(input_path, temp_path)
-        elif self.ttype == "dvd-folder":
-            self.path = handbrake_convert(input_path, temp_path)
-        elif self.ttype == "iso":
-            self.path = handbrake_convert(input_path, temp_path)
-        else:
-            logging.error(f"unknown task_type: {self.ttype}")
-            self.status = TaskStatus.Error
-            return
+        try:
+            if self.ttype == "normal":
+                self.path = ffmpeg_convert(input_path, temp_path)
+            elif self.ttype == "dvd" or self.ttype == "dvd-folder" or self.ttype == "iso":
+                self.path = handbrake_convert(input_path, temp_path)
+            else:
+                logging.error(f"unknown task_type: {self.ttype}")
+                self.status = TaskStatus.Error
+                return
+        except KeyboardInterrupt:
+            logging.info("\nUser stop tasks")
+            rm(get_temp_path(self.path))
+            task.status = TaskStatus.Waiting
+            _exit(1)
+        except Exception as e:
+            logging.error(e)
+            rm(get_temp_path(self.path))
+            task.status = TaskStatus.Error
+            _exit(2)
 
         self.status = TaskStatus.Done
 
 
-class Tasks:
-    def __init__(
-        self, task_list: List[Task] = [], create_time: str = strf_datetime(),
-    ):
-        temp_task_list: List[Task] = []
-        for task in task_list:
-            if task.status != TaskStatus.Error:
-                temp_task_list.append(task)
-        self.task_list = temp_task_list
-        self.create_time = create_time
-        self.status = TasksStatus.Waiting
+class BurnsubTask(Task):
+    def __init__(self, path: Path, sub_path: Path, ttype: str, status=TaskStatus.Waiting):
+        super().__init__(path, status)
+        self.sub_path = sub_path
+        self.ttype = ttype
 
     def __str__(self):
-        return f"{{create_time: {self.create_time}, task_list: {self.task_list}}}"
+        return f"{{path: {self.path}, sub_path: {self.sub_path}, type: {self.ttype}, status: {self.status}}}"
 
-    def add_task(self, task: Task):
-        # check if task is already exist in task_list
-        for t in self.task_list:
-            if t.path.resolve().as_posix() == task.path.resolve().as_posix():
-                return
+    def execute(self):
+        if (super().execute() == 1):
+            return
 
-        self.task_list.append(task)
-        self.status = TasksStatus.Waiting
+        input_path = self.path
+        temp_path = get_temp_path(input_path)
+        if temp_path is None:
+            logging.error("can not find temp_path: {self}")
+            self.status = TaskStatus.Error
+            return
 
-    def remove_task(self, index: int = 0):
         try:
-            self.task_list.pop(index)
-        except IndexError:
-            logging.error(f"Fail to remove task, index {index} is out of range")
-            return
+            if self.ttype == "srt" or self.ttype == "ass":
+                self.path = burn_sub(
+                    input_path, self.sub_path, self.ttype, temp_path)
+            else:
+                logging.error(f"unknown task_type: {self.ttype}")
+                self.status = TaskStatus.Error
+                return
+        except KeyboardInterrupt:
+            logging.info("\nUser stop tasks")
+            rm(get_temp_path(self.path))
+            task.status = TaskStatus.Waiting
+            _exit(1)
+        except Exception as e:
+            logging.error(e)
+            rm(get_temp_path(self.path))
+            task.status = TaskStatus.Error
+            _exit(2)
 
-    def execute_task(self, index_list: List[int] = []):
-        if self.status == TasksStatus.Done:
-            logging.debug("No new tasks have been added, do nothing")
-            return
-        elif self.status == TasksStatus.Running:
-            logging.error("Tasks are already run, do nothing")
-            return
-
-        logging.debug(f"Start Tasks: {self}")
-        self.status = TasksStatus.Running
-
-        executed_task_list = []
-        if index_list == []:
-            executed_task_list = self.task_list.copy()
-        else:
-            for index in index_list:
-                try:
-                    executed_task_list.append(self.task_list[index])
-                except IndexError:
-                    logging.error(f"Task {index} not found")
-                    self.status = TasksStatus.Error
-                    return
-
-        for i, task in enumerate(executed_task_list):
-            logging.info(
-                f"[{i + 1}/{len(executed_task_list)}] Start Task: {task.path.resolve().as_posix()}"
-            )
-
-            try:
-                task.execute()
-            except KeyboardInterrupt:
-                logging.info("\nUser stop tasks")
-                rm(get_temp_path(task.path))
-                task.status = TaskStatus.Waiting
-                _exit(1)
-            except Exception as e:
-                logging.fatal(e)
-                rm(get_temp_path(task.path))
-                task.status = TaskStatus.Error
-                _exit(10)
-
-            logging.info(f"Complete Task.")
-
-        self.status = TasksStatus.Done
+        self.status = TaskStatus.Done

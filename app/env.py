@@ -1,6 +1,9 @@
 from os import getenv
 
 config = {
+    "mode": getenv("mode", "transcoding"),
+    "sleep_time": getenv("sleep_time", "600"),
+    "execute_index": getenv("execute_index", "0"),
     # only for ffmpeg
     "threads": getenv("threads", "0"),
     "remove_source": getenv("remove_source", "false").lower(),
@@ -12,8 +15,7 @@ config = {
     # aac|opus
     # aac don't support webm
     "ac": getenv("ac", "aac").lower(),
-    # 8|10
-    # don't support vp9
+    # 8|10 don't support for vp9
     "bit": getenv("bit", "8"),
     "input": getenv("input", "/vconvert_input").lower(),
     "temp": getenv("temp", "/vconvert_temp").lower(),

@@ -1,12 +1,13 @@
 ## Task json format
-```json
+```jsonc
 {
     "create_time": "191227174219",  //time_str %y%m%d%H%M%S
+    "mode": "transcoding",          //transcoding mode
     "task_list": [
         [
             "/test/test.avi",       //path
-            "normal",               //task_type
-            "success"               //task_status
+            "normal",               //ttype
+            "success"               //status
         ],
         [
             "/test/test2/test.ts",

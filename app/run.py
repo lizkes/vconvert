@@ -1,28 +1,30 @@
 import os
 import sys
+import pprint
 import logging
 import logging.handlers
-from pathlib import Path
+from pathlib import Path, PurePath
 from time import sleep
 
 from .env import config
 from .libs.task import Tasks
-from .libs.filter import filter_video
 
 import os
 
 if __name__ == "__main__":
-    current_path = Path(Path(__file__).parent).resolve()
-    log_path = current_path.joinpath("logs", "run.log")
-    if not log_path.exists:
-        log_path.mkdir()
+    current_path = PurePath(__file__).parent
+    log_dir = Path(current_path.parent.joinpath("logs"))
+    log_path = log_dir.joinpath("run.log")
+    if not log_dir.exists():
+        log_dir.mkdir()
     file_handler = logging.handlers.RotatingFileHandler(
-        log_path, maxBytes=4 * 1024 * 1024, backupCount=5, encoding="utf-8",
+        log_path, maxBytes=10 * 1024 * 1024, backupCount=1, encoding="utf-8",
     )
     file_handler.setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging._nameToLevel.get(config["log_level"], logging.INFO))
+    stream_handler.setLevel(logging._nameToLevel.get(
+        config["log_level"], logging.INFO))
     # init logging
     logging.basicConfig(
         level=logging.DEBUG,
@@ -34,10 +36,14 @@ if __name__ == "__main__":
     Path(config["input"]).mkdir(exist_ok=True)
     Path(config["temp"]).mkdir(exist_ok=True)
 
+    # 输出环境变量
+    logging.debug(f"\n{pprint.pformat(config, indent=2)}")
+
     tasks = Tasks()
 
-    while True:
-        filter_video(tasks=tasks)
-        tasks.execute_task()
-        # check tasks every 10 minute
-        sleep(10 * 60)
+    if (config["execute_index"] == "0"):
+        while True:
+            tasks.execute_task()
+            sleep(float(config["sleep_time"]))
+    else:
+        tasks.execute_task(config["execute_index"])

@@ -1,21 +1,23 @@
-# 转码任意视频
+# ffmpeg转码工具
 
 ### 使用前提
 需安装docker
 
 
 ### 使用方法
-将下述指令的[input_dir]改为你想要转码的视频所在文件夹, [log_dir]改为你想要存储日志的文件夹, 运行.
+将下述指令的[input_dir]改为你想要转码的视频所在文件夹, 运行.
 ```bash
 docker run -d \
     -v [input_dir]:/vconvert_input \
-    -v [log_dir]:/usr/local/vconvert/app/logs/ \
     lizkes/vconvert:latest
 ```
 
 ### 环境变量
 可以添加各种环境变量来控制转码的行为
 + threads: 转码使用的线程数，默认为CPU核心数
++ mode: 运行模式，默认为transcoding，可选项 transcoding|burnsub
++ sleep_time: 休眠时间，默认为600，单位为秒
++ execute_index: 执行任务序号
 + remove_source: 是否移除源文件，默认为False
 + remove_subtitle: 是否移除源文件内的字幕, 默认为False
 + format: 设置转码后的文件格式，默认为mp4，可选项 mp4|mkv|webm
@@ -28,7 +30,7 @@ docker run -d \
 ```bash
 docker run --name vconvert -d \
     -v /usr/local/transmission/download:/vconvert_input \
-    -v /var/log/vconvert/:/usr/local/vconvert/app/logs/ \
+    -v /var/log/vconvert:/vconvert/logs \
     -e "threads=8" \
     -e "remove_source=true" \
     lizkes/vconvert:latest

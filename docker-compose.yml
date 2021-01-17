@@ -7,5 +7,5 @@ services:
       # input dir
       - /usr/local/transmission/download:/vconvert_input
       # log dir
-      - /var/log/vconvert/:/usr/local/vconvert/app/logs/
+      - /var/log/vconvert:/vconvert/logs
     #restart: on-failure

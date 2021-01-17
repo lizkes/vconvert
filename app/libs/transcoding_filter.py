@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from .task import Task, Tasks
+from .task import TranscodingTask
+from .tasks import Tasks
 from .path import get_file_format
 from ..env import config
 
@@ -56,13 +57,13 @@ def filter_file(file_path: Path, tasks: Tasks):
         #     file_path = file_path.rename(
         #         file_path.stem + "." + suffix).resolve()
         if file_format in SUPPORT_NORMAL_SUFFIXES:
-            tasks.add_task(Task(file_path, "normal"))
+            tasks.add_task(TranscodingTask(file_path, "normal"))
             return
         if file_format in SUPPORT_DVD_SUFFIXES:
-            tasks.add_task(Task(file_path, "dvd"))
+            tasks.add_task(TranscodingTask(file_path, "dvd"))
             return
         if file_format in SUPPORT_ISO_SUFFIXES:
-            tasks.add_task(Task(file_path, "iso"))
+            tasks.add_task(TranscodingTask(file_path, "iso"))
             return
         # if suffix.lower() in SUPPORT_DVD_FOLDER_SUFFIXES:
         #     tasks.add_task([file_path.parent.as_posix(), "dvd_folder", 0])
@@ -71,7 +72,7 @@ def filter_file(file_path: Path, tasks: Tasks):
 
 def traverse(dir_path: Path, tasks):
     if is_dvd_folder(dir_path):
-        tasks.add_task(Task(dir_path, "dvd-folder"))
+        tasks.add_task(TranscodingTask(dir_path, "dvd-folder"))
         return
 
     for child in dir_path.iterdir():
@@ -82,13 +83,11 @@ def traverse(dir_path: Path, tasks):
 
 
 # filter video file
-def filter_video(path: Path = Path(config["input"]), tasks: Tasks = Tasks()) -> Tasks:
+def filter(path: Path = Path(config["input"]), tasks: Tasks = Tasks()):
     if path.is_file():
         filter_file(path, tasks)
     elif path.is_dir():
         traverse(path, tasks)
-
-    return tasks
 
 
 # def check_dvd_folder(dir_path):
