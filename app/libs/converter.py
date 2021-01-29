@@ -181,7 +181,7 @@ def ffmpeg_convert(input_path, temp_path):
         logging.info(f"Renamed origin file to {input_path_str}.origin")
 
     # move target file
-    dist_path = input_path.parent.joinpath(temp_path.name.rstrip(".vctemp"))
+    dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
@@ -338,7 +338,7 @@ def handbrake_convert(input_path, temp_path):
         logging.info(f"Renamed origin file to {input_path_str}.origin")
 
     # move target file
-    dist_path = input_path.parent.joinpath(temp_path.name.rstrip(".vctemp"))
+    dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
@@ -438,7 +438,7 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
         logging.info(f"Renamed origin file to {sub_path_str}.origin")
 
     # move target file
-    dist_path = input_path.parent.joinpath(temp_path.name.rstrip(".vctemp"))
+    dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
