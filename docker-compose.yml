@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   vconvert:
+    container_name: vconvert
     build: .
     #image: lizkes/vconvert:latest
     volumes:
