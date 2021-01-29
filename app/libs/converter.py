@@ -377,11 +377,12 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
         f"{sub_command}={quote(sub_path_str)}",
     ]
 
-    if config["format"] == "mkv":
+    file_format = get_file_format(input_path)
+    if file_format == "mkv":
         command.extend(["-f", "matroska"])
-    elif config["format"] == "mp4":
+    elif file_format == "mp4":
         command.extend(["-f", "mp4"])
-    elif config["format"] == "webm":
+    elif file_format == "webm":
         command.extend(["-f", "webm"])
 
     command.append(temp_path.resolve().as_posix())
