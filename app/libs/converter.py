@@ -358,7 +358,6 @@ def handbrake_convert(input_path, temp_path):
 
 def burn_sub(input_path, sub_path, sub_format, temp_path):
     info = Info(input_path)
-    video_index = info.match_video_codec(config["vc"])
     audio_index = info.match_audio_codec(config["ac"])
     file_format = get_file_format(input_path)
     input_path_str = input_path.resolve().as_posix()
@@ -381,8 +380,6 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
         f"{sub_command}={quote(sub_path_str)}",
     ]
 
-    if video_index is not None:
-        command.extend([f"-codec:v:{video_index}", "copy"])
     if audio_index is not None:
         command.extend([f"-codec:a:{audio_index}", "copy"])
 
