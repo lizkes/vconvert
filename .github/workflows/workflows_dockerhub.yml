@@ -6,7 +6,7 @@ on:
           tag:
               description: "release tag"
               required: true
-              default: ""
+              default: "latest"
 
 jobs:
   docker:
