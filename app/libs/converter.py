@@ -35,7 +35,7 @@ def ffmpeg_convert(input_path, temp_path):
         "-loglevel",
         "info",
         "-i",
-        quote(input_path_str),
+        input_path_str,
         "-movflags",
         "+faststart",
     ]
@@ -125,7 +125,7 @@ def ffmpeg_convert(input_path, temp_path):
     if config["remove_subtitle"] == "true":
         command.extend(["-sn"])
 
-    command.append(quote(temp_path.resolve().as_posix()))
+    command.append(temp_path.resolve().as_posix())
     logging.debug(f"execute command: {' '.join(command)}")
 
     # get video duration
@@ -286,9 +286,9 @@ def handbrake_convert(input_path, temp_path):
     command.extend(
         [
             "-i",
-            quote(input_path_str),
+            input_path_str,
             "-o",
-            quote(temp_path.resolve().as_posix()),
+            temp_path.resolve().as_posix(),
         ]
     )
     logging.debug(f"execute command: {' '.join(command)}")
@@ -372,9 +372,9 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
         "-loglevel",
         "info",
         "-i",
-        quote(input_path_str),
+        input_path_str,
         "-vf",
-        quote(f"{sub_command}={quote(sub_path_str)}"),
+        f"{sub_command}={quote(sub_path_str)}",
     ]
 
     if config["format"] == "mkv":
@@ -384,7 +384,7 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
     elif config["format"] == "webm":
         command.extend(["-f", "webm"])
 
-    command.extend(quote(temp_path.resolve().as_posix()))
+    command.append(temp_path.resolve().as_posix())
 
     logging.debug(f"execute command: {' '.join(command)}")
 
