@@ -16,12 +16,16 @@ class TasksStatus(Enum):
 
 class Tasks:
     def __init__(
-        self, task_list=[], mode=config["mode"], create_time=strf_datetime(),
+        self,
+        task_list=[],
+        mode=config["mode"],
+        create_time=strf_datetime(),
     ):
         self.create_time = create_time
         self.mode = mode
         self.task_list = list(
-            filter(lambda task: task.status != TaskStatus.Error, task_list))
+            filter(lambda task: task.status != TaskStatus.Error, task_list)
+        )
         self.status = TasksStatus.Waiting
 
     def __str__(self):
@@ -40,8 +44,7 @@ class Tasks:
         try:
             self.task_list.pop(index)
         except IndexError:
-            logging.error(
-                f"Fail to remove task, index {index} is out of range")
+            logging.error(f"Fail to remove task, index {index} is out of range")
             return
 
     def execute_task(self, start_index=0, end_index=0):
@@ -69,8 +72,7 @@ class Tasks:
                 executed_task_list = self.task_list.copy()
         else:
             try:
-                executed_task_list.extend(
-                    self.task_list[start_index:end_index])
+                executed_task_list.extend(self.task_list[start_index:end_index])
             except IndexError as e:
                 logging.error(f"Task execute index exceed: {e}")
                 _exit(2)

@@ -3,6 +3,7 @@ import logging
 from time import sleep
 from shutil import move
 from pathlib import Path
+from shlex import quote
 
 from .path import get_file_format, rm
 from .info import Info
@@ -14,6 +15,7 @@ def ffmpeg_convert(input_path, temp_path):
     video_index = info.match_video_codec(config["vc"])
     audio_index = info.match_audio_codec(config["ac"])
     pix_fmt = info.get_pix_fmt()
+    input_path_str = input_path.resolve().as_posix()
 
     # check whether format is same
     if (
@@ -33,7 +35,7 @@ def ffmpeg_convert(input_path, temp_path):
         "-loglevel",
         "info",
         "-i",
-        input_path.resolve().as_posix(),
+        quote(input_path_str),
         "-movflags",
         "+faststart",
     ]
@@ -57,24 +59,18 @@ def ffmpeg_convert(input_path, temp_path):
             )
             if config["bit"] == "8":
                 if pix_fmt == "yuv420p":
-                    command.extend(
-                        ["-profile:v", "high", "-pix_fmt", "yuv420p"])
+                    command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
                 elif pix_fmt == "yuv422p":
-                    command.extend(
-                        ["-profile:v", "high422", "-pix_fmt", "yuv422p"])
+                    command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p"])
                 elif pix_fmt == "yuv444p":
-                    command.extend(
-                        ["-profile:v", "high444", "-pix_fmt", "yuv444p"])
+                    command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p"])
             if config["bit"] == "10":
                 if pix_fmt == "yuv420p":
-                    command.extend(
-                        ["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
+                    command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
                 elif pix_fmt == "yuv422p":
-                    command.extend(
-                        ["-profile:v", "high422", "-pix_fmt", "yuv422p10le"])
+                    command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p10le"])
                 elif pix_fmt == "yuv444p":
-                    command.extend(
-                        ["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
+                    command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
         elif config["vc"] == "h265":
             command.extend(
                 [
@@ -129,7 +125,7 @@ def ffmpeg_convert(input_path, temp_path):
     if config["remove_subtitle"] == "true":
         command.extend(["-sn"])
 
-    command.append(temp_path.resolve().as_posix())
+    command.append(quote(temp_path.resolve().as_posix()))
     logging.debug(f"execute command: {' '.join(command)}")
 
     # get video duration
@@ -175,7 +171,6 @@ def ffmpeg_convert(input_path, temp_path):
             )
 
     # cleanup
-    input_path_str = input_path.resolve().as_posix()
     if config["remove_origin"] == "true":
         # remove origin file
         rm(input_path)
@@ -186,7 +181,7 @@ def ffmpeg_convert(input_path, temp_path):
         logging.info(f"Renamed origin file to {input_path_str}.origin")
 
     # move target file
-    dist_path = input_path.parent.joinpath(temp_path.name)
+    dist_path = input_path.parent.joinpath(temp_path.name.rstrip(".vctemp"))
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
@@ -194,6 +189,8 @@ def ffmpeg_convert(input_path, temp_path):
 
 
 def handbrake_convert(input_path, temp_path):
+    input_path_str = input_path.resolve().as_posix()
+
     # build handbrake run command
     command = [
         "handbrake",
@@ -273,8 +270,7 @@ def handbrake_convert(input_path, temp_path):
     )
 
     if config["ac"] == "aac":
-        command.extend(["--aencoder", "copy:aac",
-                        "--audio-fallback", "ca_haac"])
+        command.extend(["--aencoder", "copy:aac", "--audio-fallback", "ca_haac"])
     elif config["ac"] == "opus":
         command.extend(["--aencoder", "opus"])
     command.extend(["--aq", "8"])
@@ -288,8 +284,12 @@ def handbrake_convert(input_path, temp_path):
         )
 
     command.extend(
-        ["-i", input_path.resolve().as_posix(), "-o",
-         temp_path.resolve().as_posix(), ]
+        [
+            "-i",
+            quote(input_path_str),
+            "-o",
+            quote(temp_path.resolve().as_posix()),
+        ]
     )
     logging.debug(f"execute command: {' '.join(command)}")
 
@@ -328,7 +328,6 @@ def handbrake_convert(input_path, temp_path):
             )
 
     # cleanup
-    input_path_str = input_path.resolve().as_posix()
     if config["remove_origin"] == "true":
         # remove origin file
         rm(input_path)
@@ -339,7 +338,7 @@ def handbrake_convert(input_path, temp_path):
         logging.info(f"Renamed origin file to {input_path_str}.origin")
 
     # move target file
-    dist_path = input_path.parent.joinpath(temp_path.name)
+    dist_path = input_path.parent.joinpath(temp_path.name.rstrip(".vctemp"))
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
 
@@ -356,8 +355,10 @@ def handbrake_convert(input_path, temp_path):
 #     else:
 #         print("Complete uncompress.")
 
+
 def burn_sub(input_path, sub_path, sub_format, temp_path):
     input_path_str = input_path.resolve().as_posix()
+    sub_path_str = sub_path.resolve().as_posix()
 
     if sub_format == "srt":
         sub_command = "subtitles"
@@ -371,10 +372,10 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
         "-loglevel",
         "info",
         "-i",
-        input_path_str,
+        quote(input_path_str),
         "-vf",
-        f"{sub_command}={sub_path.resolve().as_posix()}",
-        temp_path.resolve().as_posix()
+        f"{sub_command}={quote(sub_path_str)}",
+        quote(temp_path.resolve().as_posix()),
     ]
 
     logging.debug(f"execute command: {' '.join(command)}")
@@ -418,16 +419,18 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
     if config["remove_origin"] == "true":
         # remove origin file
         rm(input_path)
-        rm(sub_path)
         logging.info(f"Deleted origin file {input_path_str}")
+        rm(sub_path)
+        logging.info(f"Deleted origin file {sub_path_str}")
     else:
         # rename and keep origin file
-        input_path.rename(input_path_str + ".origin")
-        sub_path.rename(input_path_str + ".origin")
+        input_path.rename(f"{input_path_str}.origin")
         logging.info(f"Renamed origin file to {input_path_str}.origin")
+        sub_path.rename(f"{sub_path_str}.origin")
+        logging.info(f"Renamed origin file to {sub_path_str}.origin")
 
     # move target file
-    dist_path = input_path.parent.joinpath(temp_path.name)
+    dist_path = input_path.parent.joinpath(temp_path.name.rstrip(".vctemp"))
     move(temp_path, dist_path)
     logging.info(f"Moved temp file to {dist_path.as_posix()}")
 

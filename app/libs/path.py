@@ -6,25 +6,20 @@ from time import sleep
 from ..env import config
 
 
-def get_temp_path(input_path):
+def get_temp_path(input_path, format):
     if input_path.is_file():
-        return Path(
-            Path(config["temp"]).joinpath(
-                change_file_format(input_path, config["format"]).name
-            )
+        return Path(config["temp_dir"]).joinpath(
+            change_file_format(input_path, format).relative_to(config["input_dir"])
         )
     elif input_path.is_dir():
         if input_path.name.upper() == "VIDEO_TS":
-            return Path(
-                Path(config["temp"]).joinpath(
-                    f"{input_path.parent.name}.{config['format']}",
-                )
+            return Path(config["temp_dir"]).joinpath(
+                input_path.parent.relative_to(config["input_dir"]),
+                f"{input_path.parent.name}.{format}.vctemp",
             )
         else:
-            return Path(
-                Path(config["temp"]).joinpath(
-                    f"{input_path.name}.{config['format']}",
-                )
+            return Path(config["temp_dir"]).joinpath(
+                change_file_format(input_path, format).relative_to(config["input_dir"])
             )
     else:
         logging.error(
@@ -47,8 +42,11 @@ def change_file_format(input_path, format):
     if input_path.is_file():
         suffix = input_path.suffix
         if suffix:
-            return Path(f"{input_path.as_posix()[:-(len(suffix)-1)]}{format}")
-    return input_path
+            return Path(f"{input_path.as_posix()[:-(len(suffix))]}.{format}.vctemp")
+    elif input_path.is_dir():
+        return Path(f"{input_path.as_posix()}.{format}.vctemp")
+    else:
+        return input_path
 
 
 def rm(path):

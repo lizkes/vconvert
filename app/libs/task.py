@@ -3,8 +3,10 @@ from abc import ABC, abstractmethod
 from os import _exit
 from enum import Enum
 from pathlib import Path
+
 from .converter import ffmpeg_convert, handbrake_convert, burn_sub
-from .path import rm, get_temp_path
+from .path import rm, get_temp_path, get_file_format
+from ..env import config
 
 
 class TaskStatus(Enum):
@@ -53,7 +55,7 @@ class TranscodingTask(Task):
             return
 
         input_path = self.path
-        temp_path = get_temp_path(input_path)
+        temp_path = get_temp_path(input_path, config["format"])
         if temp_path is None:
             logging.error("can not find temp_path: {self}")
             self.status = TaskStatus.Error
@@ -62,7 +64,9 @@ class TranscodingTask(Task):
         try:
             if self.ttype == "normal":
                 self.path = ffmpeg_convert(input_path, temp_path)
-            elif self.ttype == "dvd" or self.ttype == "dvd-folder" or self.ttype == "iso":
+            elif (
+                self.ttype == "dvd" or self.ttype == "dvd-folder" or self.ttype == "iso"
+            ):
                 self.path = handbrake_convert(input_path, temp_path)
             else:
                 logging.error(f"unknown task_type: {self.ttype}")
@@ -70,12 +74,12 @@ class TranscodingTask(Task):
                 return
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
-            rm(get_temp_path(self.path))
+            rm(temp_path)
             self.status = TaskStatus.Waiting
             _exit(1)
         except Exception as e:
             logging.error(e)
-            rm(get_temp_path(self.path))
+            rm(temp_path)
             self.status = TaskStatus.Error
             _exit(2)
 
@@ -96,7 +100,7 @@ class BurnsubTask(Task):
             return
 
         input_path = self.path
-        temp_path = get_temp_path(input_path)
+        temp_path = get_temp_path(input_path, get_file_format(input_path))
         if temp_path is None:
             logging.error("can not find temp_path: {self}")
             self.status = TaskStatus.Error
@@ -104,20 +108,19 @@ class BurnsubTask(Task):
 
         try:
             if self.ttype == "srt" or self.ttype == "ass":
-                self.path = burn_sub(
-                    input_path, self.sub_path, self.ttype, temp_path)
+                self.path = burn_sub(input_path, self.sub_path, self.ttype, temp_path)
             else:
                 logging.error(f"unknown task_type: {self.ttype}")
                 self.status = TaskStatus.Error
                 return
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
-            rm(get_temp_path(self.path))
+            rm(temp_path)
             self.status = TaskStatus.Waiting
             _exit(1)
         except Exception as e:
             logging.error(e)
-            rm(get_temp_path(self.path))
+            rm(temp_path)
             self.status = TaskStatus.Error
             _exit(2)
 

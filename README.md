@@ -29,8 +29,8 @@ docker run -d \
 ### 示例
 ```bash
 docker run --name vconvert -d \
-    -v /usr/local/transmission/download:/vconvert_input \
-    -v /var/log/vconvert:/vconvert/logs \
+    -v /download:/vconvert \
+    -v /var/log/vconvert:/var/log/vconvert \
     -e "threads=8" \
     -e "remove_origin=true" \
     lizkes/vconvert:latest

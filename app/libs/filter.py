@@ -7,8 +7,25 @@ from ..env import config
 
 
 class BurnsubFilter:
-    SUPPORT_NORMAL_SUFFIXES = ["mp4", "wmv", "avi", "webm", "mkv", "rmvb", "mpeg",
-                               "flv", "mpg", "m4v", "3gp", "mov", "qt", "mp2", "mpe", "mpv", "ogg"]
+    SUPPORT_NORMAL_SUFFIXES = [
+        "mp4",
+        "wmv",
+        "avi",
+        "webm",
+        "mkv",
+        "rmvb",
+        "mpeg",
+        "flv",
+        "mpg",
+        "m4v",
+        "3gp",
+        "mov",
+        "qt",
+        "mp2",
+        "mpe",
+        "mpv",
+        "ogg",
+    ]
 
     def __init__(self):
         if config["execute_index"] != "0":
@@ -46,7 +63,7 @@ class BurnsubFilter:
             if self.find_count == self.need_find:
                 return
 
-    def filte(self, path=Path(config["input"]), tasks=Tasks()):
+    def filte(self, path=Path(config["input_dir"]), tasks=Tasks()):
         if path.is_file():
             self.filter_file(path, tasks)
         elif path.is_dir():
@@ -54,8 +71,25 @@ class BurnsubFilter:
 
 
 class TranscodingFilter:
-    SUPPORT_NORMAL_SUFFIXES = ["mp4", "wmv", "avi", "webm", "mkv", "rmvb", "mpeg",
-                               "flv", "mpg", "m4v", "3gp", "mov", "qt", "mp2", "mpe", "mpv", "ogg"]
+    SUPPORT_NORMAL_SUFFIXES = [
+        "mp4",
+        "wmv",
+        "avi",
+        "webm",
+        "mkv",
+        "rmvb",
+        "mpeg",
+        "flv",
+        "mpg",
+        "m4v",
+        "3gp",
+        "mov",
+        "qt",
+        "mp2",
+        "mpe",
+        "mpv",
+        "ogg",
+    ]
     SUPPORT_DVD_SUFFIXES = ["m2ts", "mts", "ts", "avchd"]
     SUPPORT_ISO_SUFFIXES = ["iso"]
     # VIDEO_SUFFIXES = ["yuv", "wmv", "webm", "vob", "svi", "roq", "rmvb", "rm", "ogv", "ogg", "nsv", "mxf", "ts", "mpg", "mpeg", "m2v", "mp2", "mpe", "mpv", "mp4", "m4p", "m4v", "mov", "qt", "mng", "mkv", "flv", "f4v", "f4p", "f4a", "f4b", "drc", "avi", "asf", "amv", "3gp", "3g2", "mxf", "m2p", "ps", "m2ts", "mts", "iso", "avchd", "swf"]
@@ -128,7 +162,7 @@ class TranscodingFilter:
             if self.find_count == self.need_find:
                 return
 
-    def filte(self, path=Path(config["input"]), tasks=Tasks()):
+    def filte(self, path=Path(config["input_dir"]), tasks=Tasks()):
         if path.is_file():
             self.filter_file(path, tasks)
         elif path.is_dir():

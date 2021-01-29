@@ -9,22 +9,22 @@ from time import sleep
 from .env import config
 from .libs.tasks import Tasks
 
-import os
-
 if __name__ == "__main__":
+    Path(config["input_dir"]).mkdir(exist_ok=True)
+    Path(config["temp_dir"]).mkdir(exist_ok=True)
+    Path(config["log_dir"]).mkdir(exist_ok=True)
+
     current_path = PurePath(__file__).parent
-    log_dir = Path(current_path.parent.joinpath("logs"))
-    log_path = log_dir.joinpath("run.log")
-    if not log_dir.exists():
-        log_dir.mkdir()
     file_handler = logging.handlers.RotatingFileHandler(
-        log_path, maxBytes=10 * 1024 * 1024, backupCount=1, encoding="utf-8",
+        Path(config["log_dir"]).joinpath("run.log"),
+        maxBytes=10 * 1024 * 1024,
+        backupCount=1,
+        encoding="utf-8",
     )
     file_handler.setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging._nameToLevel.get(
-        config["log_level"], logging.INFO))
+    stream_handler.setLevel(logging._nameToLevel.get(config["log_level"], logging.INFO))
     # init logging
     logging.basicConfig(
         level=logging.DEBUG,
@@ -32,9 +32,6 @@ if __name__ == "__main__":
         datefmt="%y/%m/%d %H:%M:%S",
         handlers=[file_handler, stream_handler],
     )
-
-    Path(config["input"]).mkdir(exist_ok=True)
-    Path(config["temp"]).mkdir(exist_ok=True)
 
     # 输出环境变量
     logging.debug(f"\n{pprint.pformat(config, indent=2)}")

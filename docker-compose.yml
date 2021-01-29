@@ -1,11 +1,11 @@
 version: "3.8"
 services:
   vconvert:
-    image: .
-    container_name: vconvert
+    build: .
+    #image: lizkes/vconvert:latest
     volumes:
       # input dir
-      - /usr/local/transmission/download:/vconvert_input
+      - /download:/vconvert
       # log dir
-      - /var/log/vconvert:/vconvert/logs
+      - /var/log/vconvert:/var/log/vconvert
     #restart: on-failure

@@ -17,7 +17,8 @@ config = {
     "ac": getenv("ac", "aac").lower(),
     # 8|10 don't support for vp9
     "bit": getenv("bit", "8"),
-    "input": getenv("input", "/vconvert_input").lower(),
-    "temp": getenv("temp", "/vconvert_temp").lower(),
+    "input_dir": getenv("input_dir", "/vconvert").lower(),
+    "temp_dir": getenv("temp_dir", "/vconvert").lower(),
+    "log_dir": getenv("log_dir", "/var/log/vconvert").lower(),
     "log_level": getenv("log_level", "INFO").upper(),
 }
