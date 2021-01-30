@@ -2,7 +2,6 @@ import logging
 from abc import ABC, abstractmethod
 from os import _exit
 from enum import Enum
-from pathlib import Path
 
 from .converter import ffmpeg_convert, handbrake_convert, burn_sub
 from .path import rm, get_temp_path, get_file_format
@@ -87,13 +86,14 @@ class TranscodingTask(Task):
 
 
 class BurnsubTask(Task):
-    def __init__(self, path, sub_path, ttype, status=TaskStatus.Waiting):
+    def __init__(self, path, sub_path, status=TaskStatus.Waiting):
         super().__init__(path, status)
         self.sub_path = sub_path
-        self.ttype = ttype
 
     def __str__(self):
-        return f"{{path: {self.path}, sub_path: {self.sub_path}, type: {self.ttype}, status: {self.status}}}"
+        return (
+            f"{{path: {self.path}, sub_path: {self.sub_path}, status: {self.status}}}"
+        )
 
     def execute(self):
         if super().execute() == 1:
@@ -107,12 +107,7 @@ class BurnsubTask(Task):
             return
 
         try:
-            if self.ttype == "srt" or self.ttype == "ass":
-                self.path = burn_sub(input_path, self.sub_path, self.ttype, temp_path)
-            else:
-                logging.error(f"unknown task_type: {self.ttype}")
-                self.status = TaskStatus.Error
-                return
+            self.path = burn_sub(input_path, self.sub_path, temp_path)
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)

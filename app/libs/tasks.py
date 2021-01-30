@@ -1,6 +1,5 @@
 import logging
 from os import _exit
-from typing import List
 from enum import Enum
 
 from .time import strf_datetime

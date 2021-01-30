@@ -17,9 +17,9 @@ docker run -d \
 + threads: 转码使用的线程数，默认为CPU核心数
 + mode: 运行模式，默认为transcoding，可选项 transcoding|burnsub
 + sleep_time: 休眠时间，默认为600，单位为秒
-+ execute_index: 执行任务序号
++ execute_index: 执行任务序号, 默认为所有文件，格式 [start_index],[end_index]
 + remove_origin: 是否移除源文件，默认为false
-+ remove_subtitle: 是否移除源文件内的字幕, 默认为false
++ remove_subtitle: 是否移除文件内的字幕, 默认为false
 + format: 设置转码后的文件格式，默认为mp4，可选项 mp4|mkv|webm
 + vc：设置转码后文件的视频编码，默认为h264，可选项 h264|h265|vp9
 + ac：设置转码后文件的音频编码，默认为aac，可选项 aac|opus

@@ -26,6 +26,7 @@ class BurnsubFilter:
         "mpv",
         "ogg",
     ]
+    SUPPORT_SUB_SUFFIXES = ["ass", "srt"]
 
     def __init__(self):
         if config["execute_index"] != "0":
@@ -38,17 +39,12 @@ class BurnsubFilter:
     def filter_file(self, file_path, tasks):
         file_format = get_file_format(file_path)
         if file_format in self.SUPPORT_NORMAL_SUFFIXES:
-            srt_file_path = Path(file_path.with_suffix(".srt"))
-            if srt_file_path.exists():
-                tasks.add_task(BurnsubTask(file_path, srt_file_path, "srt"))
-                self.find_count += 1
-                return
-
-            ass_file_path = Path(file_path.with_suffix(".ass"))
-            if ass_file_path.exists():
-                tasks.add_task(BurnsubTask(file_path, ass_file_path, "ass"))
-                self.find_count += 1
-                return
+            for sub_suffix in self.SUPPORT_SUB_SUFFIXES:
+                sub_file_path = file_path.with_suffix(sub_suffix)
+                if sub_file_path.exists():
+                    tasks.add_task(BurnsubTask(file_path, sub_file_path))
+                    self.find_count += 1
+                    return
 
     def traverse(self, dir_path, tasks):
         for child in dir_path.iterdir():
@@ -92,7 +88,6 @@ class TranscodingFilter:
     ]
     SUPPORT_DVD_SUFFIXES = ["m2ts", "mts", "ts", "avchd"]
     SUPPORT_ISO_SUFFIXES = ["iso"]
-    # VIDEO_SUFFIXES = ["yuv", "wmv", "webm", "vob", "svi", "roq", "rmvb", "rm", "ogv", "ogg", "nsv", "mxf", "ts", "mpg", "mpeg", "m2v", "mp2", "mpe", "mpv", "mp4", "m4p", "m4v", "mov", "qt", "mng", "mkv", "flv", "f4v", "f4p", "f4a", "f4b", "drc", "avi", "asf", "amv", "3gp", "3g2", "mxf", "m2p", "ps", "m2ts", "mts", "iso", "avchd", "swf"]
 
     def __init__(self):
         if config["execute_index"] != "0":

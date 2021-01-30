@@ -6,15 +6,16 @@ from pathlib import Path
 from shlex import quote
 
 from .path import get_file_format, rm
+from .encode import is_utf16, utf16_to_utf8
 from .info import Info
 from ..env import config
 
 
 def ffmpeg_convert(input_path, temp_path):
     info = Info(input_path)
-    video_index = info.match_video_codec(config["vc"])
-    audio_index = info.match_audio_codec(config["ac"])
+    video_index = info.match_video_codec(config["vc"], config["bit"])
     pix_fmt = info.get_pix_fmt()
+    audio_index = info.match_audio_codec(config["ac"])
     input_path_str = input_path.resolve().as_posix()
 
     # check whether format is same
@@ -118,7 +119,6 @@ def ffmpeg_convert(input_path, temp_path):
             command.extend(["-codec:a", "libfdk_aac", "-vbr", "4"])
         elif config["ac"] == "opus":
             command.extend(["-codec:a", "libopus", "-vbr", "1", "-b:a", "64k"])
-
     else:
         command.extend([f"-codec:a:{audio_index}", "copy"])
 
@@ -356,17 +356,16 @@ def handbrake_convert(input_path, temp_path):
 #         print("Complete uncompress.")
 
 
-def burn_sub(input_path, sub_path, sub_format, temp_path):
+def burn_sub(input_path, sub_path, temp_path):
     info = Info(input_path)
+    pix_fmt = info.get_pix_fmt()
     audio_index = info.match_audio_codec(config["ac"])
-    file_format = get_file_format(input_path)
     input_path_str = input_path.resolve().as_posix()
     sub_path_str = sub_path.resolve().as_posix()
 
-    if sub_format == "srt":
-        sub_command = "subtitles"
-    elif sub_format == "ass":
-        sub_command = "ass"
+    if is_utf16(sub_path):
+        logging.info("sub file is utf-16, start convert to utf-8...")
+        utf16_to_utf8(sub_path, sub_path)
 
     command = [
         "ffmpeg",
@@ -377,21 +376,88 @@ def burn_sub(input_path, sub_path, sub_format, temp_path):
         "-i",
         input_path_str,
         "-vf",
-        f"{sub_command}={quote(sub_path_str)}",
+        f"subtitles={quote(sub_path_str)}",
+        "-movflags",
+        "+faststart",
     ]
 
-    if audio_index is not None:
-        command.extend([f"-codec:a:{audio_index}", "copy"])
-
-    if file_format == "mkv":
+    if config["format"] == "mkv":
         command.extend(["-f", "matroska"])
-    elif file_format == "mp4":
+    elif config["format"] == "mp4":
         command.extend(["-f", "mp4"])
-    elif file_format == "webm":
+    elif config["format"] == "webm":
         command.extend(["-f", "webm"])
 
-    command.append(temp_path.resolve().as_posix())
+    if config["threads"] != "0":
+        command.extend(["-threads", config["threads"]])
 
+    # pix_fmt: yuv420p yuv422p yuv444p yuvj420p yuvj422p yuvj444p yuv420p10le yuv422p10le yuv444p10le
+    # for x265 doc, see https://x265.readthedocs.io/en/default/cli.html#profile-level-tier
+    if config["vc"] == "h264":
+        command.extend(["-codec:v", "libx264", "-level:v", "4.2", "-preset", "medium"])
+        if config["bit"] == "8":
+            if pix_fmt == "yuv420p":
+                command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
+            elif pix_fmt == "yuv422p":
+                command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p"])
+            elif pix_fmt == "yuv444p":
+                command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p"])
+        if config["bit"] == "10":
+            if pix_fmt == "yuv420p":
+                command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
+            elif pix_fmt == "yuv422p":
+                command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p10le"])
+            elif pix_fmt == "yuv444p":
+                command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
+    elif config["vc"] == "h265":
+        command.extend(
+            [
+                "-codec:v",
+                "libx265",
+                "-x265-params",
+                "level-idc=4.2",
+                "-preset",
+                "medium",
+            ]
+        )
+        if config["bit"] == "8":
+            if pix_fmt == "yuv420p" or pix_fmt == "yuv422p":
+                command.extend(["-profile:v", "main"])
+            elif pix_fmt == "yuv444p":
+                command.extend(["-profile:v", "main444-8"])
+        if config["bit"] == "10":
+            if pix_fmt == "yuv420p":
+                command.extend(["-profile:v", "main10"])
+            elif pix_fmt == "yuv422p":
+                command.extend(["-profile:v", "main422-10"])
+            elif pix_fmt == "yuv444p":
+                command.extend(["-profile:v", "main444-10"])
+    elif config["vc"] == "vp9":
+        command.extend(
+            [
+                "-codec:v",
+                "libvpx-vp9",
+                "-b:v",
+                "0",
+                "-level:v",
+                "4.2",
+                "-row-mt",
+                "1",
+            ]
+        )
+
+    command.extend(["-crf", "18"])
+
+    if audio_index is None:
+        if config["ac"] == "aac":
+            # -vbr min:1 max:5
+            command.extend(["-codec:a", "libfdk_aac", "-vbr", "4"])
+        elif config["ac"] == "opus":
+            command.extend(["-codec:a", "libopus", "-vbr", "1", "-b:a", "64k"])
+    else:
+        command.extend([f"-codec:a:{audio_index}", "copy"])
+
+    command.append(temp_path.resolve().as_posix())
     logging.debug(f"execute command: {' '.join(command)}")
 
     # start convert

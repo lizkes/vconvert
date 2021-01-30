@@ -7,6 +7,16 @@ from ..env import config
 
 
 def get_temp_path(input_path, format):
+    def change_file_format(input_path, format):
+        if input_path.is_file():
+            suffix = input_path.suffix
+            if suffix:
+                return Path(f"{input_path.as_posix()[:-(len(suffix))]}.{format}.vctemp")
+        elif input_path.is_dir():
+            return Path(f"{input_path.as_posix()}.{format}.vctemp")
+        else:
+            return input_path
+
     if input_path.is_file():
         return Path(config["temp_dir"]).joinpath(
             change_file_format(input_path, format).relative_to(config["input_dir"])
@@ -29,24 +39,15 @@ def get_temp_path(input_path, format):
 
 
 def get_file_format(input_path):
-    if input_path.is_file():
-        suffixes = input_path.suffixes
-        if len(suffixes) > 0:
-            file_format = suffixes[-1][1:].lower()
-            if len(file_format) > 0:
-                return file_format
-    return None
+    return input_path.suffix[1:]
 
 
-def change_file_format(input_path, format):
-    if input_path.is_file():
-        suffix = input_path.suffix
-        if suffix:
-            return Path(f"{input_path.as_posix()[:-(len(suffix))]}.{format}.vctemp")
-    elif input_path.is_dir():
-        return Path(f"{input_path.as_posix()}.{format}.vctemp")
-    else:
-        return input_path
+def add_suffix(input_path, suffix):
+    return Path(f"{input_path.as_posix()}.{suffix}")
+
+
+def remove_suffix(input_path, suffix):
+    return input_path.with_suffix(input_path.suffix.rstrip(suffix).rstrip("."))
 
 
 def rm(path):
