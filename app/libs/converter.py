@@ -56,7 +56,7 @@ def ffmpeg_convert(input_path, temp_path):
     if video_index is None:
         if config["vc"] == "h264":
             command.extend(
-                ["-codec:v", "libx264", "-level:v", "4.2", "-preset", "medium"]
+                ["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"]
             )
             if config["bit"] == "8":
                 if pix_fmt == "yuv420p":
@@ -77,8 +77,6 @@ def ffmpeg_convert(input_path, temp_path):
                 [
                     "-codec:v",
                     "libx265",
-                    "-x265-params",
-                    "level-idc=4.2",
                     "-preset",
                     "medium",
                 ]
@@ -103,22 +101,22 @@ def ffmpeg_convert(input_path, temp_path):
                     "-b:v",
                     "0",
                     "-level:v",
-                    "4.2",
+                    "4.1",
                     "-row-mt",
                     "1",
                 ]
             )
 
-        command.extend(["-crf", "18"])
+        command.extend(["-crf", "20"])
     else:
         command.extend([f"-codec:v:{video_index}", "copy"])
 
     if audio_index is None:
         if config["ac"] == "aac":
             # -vbr min:1 max:5
-            command.extend(["-codec:a", "libfdk_aac", "-vbr", "4"])
+            command.extend(["-codec:a", "libfdk_aac", "-vbr", "5"])
         elif config["ac"] == "opus":
-            command.extend(["-codec:a", "libopus", "-vbr", "1", "-b:a", "64k"])
+            command.extend(["-codec:a", "libopus", "-vbr", "on", "-b:a", "96K"])
     else:
         command.extend([f"-codec:a:{audio_index}", "copy"])
 
@@ -211,7 +209,7 @@ def handbrake_convert(input_path, temp_path):
                     "--encoder-profile",
                     "high",
                     "--encoder-level",
-                    "4.2",
+                    "4.1",
                 ]
             )
         elif config["bit"] == "10":
@@ -222,7 +220,7 @@ def handbrake_convert(input_path, temp_path):
                     "--encoder-profile",
                     "high10",
                     "--encoder-level",
-                    "4.2",
+                    "4.1",
                 ]
             )
     elif config["vc"] == "h265":
@@ -234,7 +232,7 @@ def handbrake_convert(input_path, temp_path):
                     "--encoder-profile",
                     "main",
                     "--encoder-level",
-                    "4.2",
+                    "4.1",
                 ]
             )
         elif config["bit"] == "10":
@@ -245,7 +243,7 @@ def handbrake_convert(input_path, temp_path):
                     "--encoder-profile",
                     "main10",
                     "--encoder-level",
-                    "4.2",
+                    "4.1",
                 ]
             )
     elif config["vc"] == "vp9":
@@ -254,7 +252,7 @@ def handbrake_convert(input_path, temp_path):
     command.extend(
         [
             "--quality",
-            "18",
+            "20",
             "--encoder-preset",
             "medium",
             # "--align-av",
@@ -394,7 +392,7 @@ def burn_sub(input_path, sub_path, temp_path):
     # pix_fmt: yuv420p yuv422p yuv444p yuvj420p yuvj422p yuvj444p yuv420p10le yuv422p10le yuv444p10le
     # for x265 doc, see https://x265.readthedocs.io/en/default/cli.html#profile-level-tier
     if config["vc"] == "h264":
-        command.extend(["-codec:v", "libx264", "-level:v", "4.2", "-preset", "medium"])
+        command.extend(["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"])
         if config["bit"] == "8":
             if pix_fmt == "yuv420p":
                 command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
@@ -414,8 +412,6 @@ def burn_sub(input_path, sub_path, temp_path):
             [
                 "-codec:v",
                 "libx265",
-                "-x265-params",
-                "level-idc=4.2",
                 "-preset",
                 "medium",
             ]
@@ -440,20 +436,20 @@ def burn_sub(input_path, sub_path, temp_path):
                 "-b:v",
                 "0",
                 "-level:v",
-                "4.2",
+                "4.1",
                 "-row-mt",
                 "1",
             ]
         )
 
-    command.extend(["-crf", "18"])
+    command.extend(["-crf", "20"])
 
     if audio_index is None:
         if config["ac"] == "aac":
             # -vbr min:1 max:5
-            command.extend(["-codec:a", "libfdk_aac", "-vbr", "4"])
+            command.extend(["-codec:a", "libfdk_aac", "-vbr", "5"])
         elif config["ac"] == "opus":
-            command.extend(["-codec:a", "libopus", "-vbr", "1", "-b:a", "64k"])
+            command.extend(["-codec:a", "libopus", "-vbr", "on", "-b:a", "96K"])
     else:
         command.extend([f"-codec:a:{audio_index}", "copy"])
 

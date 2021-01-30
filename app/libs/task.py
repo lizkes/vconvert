@@ -4,7 +4,7 @@ from os import _exit
 from enum import Enum
 
 from .converter import ffmpeg_convert, handbrake_convert, burn_sub
-from .path import rm, get_temp_path, get_file_format
+from .path import rm, get_temp_path
 from ..env import config
 
 
@@ -100,7 +100,7 @@ class BurnsubTask(Task):
             return
 
         input_path = self.path
-        temp_path = get_temp_path(input_path, get_file_format(input_path))
+        temp_path = get_temp_path(input_path, config["format"])
         if temp_path is None:
             logging.error("can not find temp_path: {self}")
             self.status = TaskStatus.Error
