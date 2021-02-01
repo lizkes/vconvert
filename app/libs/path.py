@@ -47,7 +47,7 @@ def add_suffix(input_path, suffix):
 
 
 def remove_suffix(input_path, suffix):
-    return input_path.with_suffix(input_path.suffix.rstrip(suffix).rstrip("."))
+    return input_path.with_suffix(input_path.suffix.rstrip(suffix))
 
 
 def rm(path):

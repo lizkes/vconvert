@@ -36,7 +36,7 @@ class BurnsubFilter:
         file_format = get_file_format(file_path)
         if file_format in self.SUPPORT_NORMAL_SUFFIXES:
             for sub_suffix in self.SUPPORT_SUB_SUFFIXES:
-                sub_file_path = file_path.with_suffix(sub_suffix)
+                sub_file_path = file_path.with_suffix(f".{sub_suffix}")
                 if sub_file_path.exists():
                     if tasks.add_task(BurnsubTask(file_path, sub_file_path)):
                         self.now_num += 1
@@ -114,7 +114,7 @@ class BothFilter:
         file_format = get_file_format(file_path)
         if file_format in self.SUPPORT_NORMAL_SUFFIXES:
             for sub_suffix in self.SUPPORT_SUB_SUFFIXES:
-                sub_file_path = file_path.with_suffix(sub_suffix)
+                sub_file_path = file_path.with_suffix(f".{sub_suffix}")
                 if sub_file_path.exists():
                     if tasks.add_task(BurnsubTask(file_path, sub_file_path)):
                         self.now_num += 1
