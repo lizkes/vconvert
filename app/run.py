@@ -1,4 +1,3 @@
-import os
 import sys
 import pprint
 import logging
@@ -8,6 +7,7 @@ from time import sleep
 
 from .env import config
 from .libs.tasks import Tasks
+from .libs.firebase import FirebaseDB
 
 if __name__ == "__main__":
     Path(config["input_dir"]).mkdir(exist_ok=True)
@@ -33,17 +33,26 @@ if __name__ == "__main__":
         handlers=[file_handler, stream_handler],
     )
 
-    # 输出环境变量
-    logging.debug(f"\n{pprint.pformat(config, indent=2)}")
+    db = FirebaseDB(
+        config["fb_api_key"],
+        config["fb_project_id"],
+        config["fb_db_url"],
+        config["fb_email"],
+        config["fb_password"],
+    )
+    if db.is_valid():
+        db.new()
+        data = db.get()
+        tasks = Tasks(firebase_db=db)
+        if data:
+            tasks.from_obj(data)
 
-    tasks = Tasks()
+        tasks.execute_task(execute_number=1)
+    else:
+        # 输出环境变量
+        logging.debug(f"\n{pprint.pformat(config, indent=2)}")
 
-    if config["execute_index"] == "0":
+        tasks = Tasks()
         while True:
             tasks.execute_task()
             sleep(float(config["sleep_time"]))
-    else:
-        index_list = config["execute_index"].split(",")
-        start_index = int(index_list[0])
-        end_index = int(index_list[1])
-        tasks.execute_task(start_index, end_index)

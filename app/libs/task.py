@@ -8,7 +8,7 @@ from .path import rm, get_temp_path
 from ..env import config
 
 
-class TaskStatus(Enum):
+class TaskStatus(str, Enum):
     Waiting = "waiting"
     Running = "running"
     Done = "done"
@@ -19,6 +19,7 @@ class Task(ABC):
     def __init__(self, path, status=TaskStatus.Waiting):
         self.path = path
         self.status = status
+        self.uuid = config["uuid"]
 
     def __str__(self):
         return f"{{path: {self.path}, status: {self.status}}}"

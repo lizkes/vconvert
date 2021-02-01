@@ -14,7 +14,6 @@ from ..env import config
 def ffmpeg_convert(input_path, temp_path):
     info = Info(input_path)
     video_index = info.match_video_codec(config["vc"], config["bit"])
-    pix_fmt = info.get_pix_fmt()
     audio_index = info.match_audio_codec(config["ac"])
     input_path_str = input_path.resolve().as_posix()
 
@@ -59,19 +58,9 @@ def ffmpeg_convert(input_path, temp_path):
                 ["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"]
             )
             if config["bit"] == "8":
-                if pix_fmt == "yuv420p":
-                    command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
-                elif pix_fmt == "yuv422p":
-                    command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p"])
-                elif pix_fmt == "yuv444p":
-                    command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p"])
+                command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
             if config["bit"] == "10":
-                if pix_fmt == "yuv420p":
-                    command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
-                elif pix_fmt == "yuv422p":
-                    command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p10le"])
-                elif pix_fmt == "yuv444p":
-                    command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
+                command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
         elif config["vc"] == "h265":
             command.extend(
                 [
@@ -82,30 +71,26 @@ def ffmpeg_convert(input_path, temp_path):
                 ]
             )
             if config["bit"] == "8":
-                if pix_fmt == "yuv420p" or pix_fmt == "yuv422p":
-                    command.extend(["-profile:v", "main"])
-                elif pix_fmt == "yuv444p":
-                    command.extend(["-profile:v", "main444-8"])
+                command.extend(["-profile:v", "main"])
             if config["bit"] == "10":
-                if pix_fmt == "yuv420p":
-                    command.extend(["-profile:v", "main10"])
-                elif pix_fmt == "yuv422p":
-                    command.extend(["-profile:v", "main422-10"])
-                elif pix_fmt == "yuv444p":
-                    command.extend(["-profile:v", "main444-10"])
+                command.extend(["-profile:v", "main10"])
         elif config["vc"] == "vp9":
             command.extend(
                 [
                     "-codec:v",
                     "libvpx-vp9",
+                    # https://trac.ffmpeg.org/wiki/Encode/VP9#constantq
                     "-b:v",
                     "0",
-                    "-level:v",
-                    "4.1",
+                    # https://trac.ffmpeg.org/wiki/Encode/VP9#rowmt
                     "-row-mt",
                     "1",
                 ]
             )
+            if config["bit"] == "8":
+                command.extend(["-pix_fmt", "yuv420p"])
+            if config["bit"] == "10":
+                command.extend(["-pix_fmt", "yuv420p10le"])
 
         command.extend(["-crf", "20"])
     else:
@@ -116,7 +101,7 @@ def ffmpeg_convert(input_path, temp_path):
             # -vbr min:1 max:5
             command.extend(["-codec:a", "libfdk_aac", "-vbr", "5"])
         elif config["ac"] == "opus":
-            command.extend(["-codec:a", "libopus", "-vbr", "on", "-b:a", "96K"])
+            command.extend(["-codec:a", "libopus", "-vbr", "1", "-b:a", "96K"])
     else:
         command.extend([f"-codec:a:{audio_index}", "copy"])
 
@@ -231,8 +216,6 @@ def handbrake_convert(input_path, temp_path):
                     "x265",
                     "--encoder-profile",
                     "main",
-                    "--encoder-level",
-                    "4.1",
                 ]
             )
         elif config["bit"] == "10":
@@ -242,8 +225,6 @@ def handbrake_convert(input_path, temp_path):
                     "x265_10bit",
                     "--encoder-profile",
                     "main10",
-                    "--encoder-level",
-                    "4.1",
                 ]
             )
     elif config["vc"] == "vp9":
@@ -356,7 +337,6 @@ def handbrake_convert(input_path, temp_path):
 
 def burn_sub(input_path, sub_path, temp_path):
     info = Info(input_path)
-    pix_fmt = info.get_pix_fmt()
     audio_index = info.match_audio_codec(config["ac"])
     input_path_str = input_path.resolve().as_posix()
     sub_path_str = sub_path.resolve().as_posix()
@@ -394,19 +374,9 @@ def burn_sub(input_path, sub_path, temp_path):
     if config["vc"] == "h264":
         command.extend(["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"])
         if config["bit"] == "8":
-            if pix_fmt == "yuv420p":
-                command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
-            elif pix_fmt == "yuv422p":
-                command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p"])
-            elif pix_fmt == "yuv444p":
-                command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p"])
+            command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
         if config["bit"] == "10":
-            if pix_fmt == "yuv420p":
-                command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
-            elif pix_fmt == "yuv422p":
-                command.extend(["-profile:v", "high422", "-pix_fmt", "yuv422p10le"])
-            elif pix_fmt == "yuv444p":
-                command.extend(["-profile:v", "high444", "-pix_fmt", "yuv444p10le"])
+            command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
     elif config["vc"] == "h265":
         command.extend(
             [
@@ -417,30 +387,26 @@ def burn_sub(input_path, sub_path, temp_path):
             ]
         )
         if config["bit"] == "8":
-            if pix_fmt == "yuv420p" or pix_fmt == "yuv422p":
-                command.extend(["-profile:v", "main"])
-            elif pix_fmt == "yuv444p":
-                command.extend(["-profile:v", "main444-8"])
+            command.extend(["-profile:v", "main"])
         if config["bit"] == "10":
-            if pix_fmt == "yuv420p":
-                command.extend(["-profile:v", "main10"])
-            elif pix_fmt == "yuv422p":
-                command.extend(["-profile:v", "main422-10"])
-            elif pix_fmt == "yuv444p":
-                command.extend(["-profile:v", "main444-10"])
+            command.extend(["-profile:v", "main10"])
     elif config["vc"] == "vp9":
         command.extend(
             [
                 "-codec:v",
                 "libvpx-vp9",
+                # https://trac.ffmpeg.org/wiki/Encode/VP9#constantq
                 "-b:v",
                 "0",
-                "-level:v",
-                "4.1",
+                # https://trac.ffmpeg.org/wiki/Encode/VP9#rowmt
                 "-row-mt",
                 "1",
             ]
         )
+        if config["bit"] == "8":
+            command.extend(["-pix_fmt", "yuv420p"])
+        if config["bit"] == "10":
+            command.extend(["-pix_fmt", "yuv420p10le"])
 
     command.extend(["-crf", "20"])
 
@@ -449,7 +415,7 @@ def burn_sub(input_path, sub_path, temp_path):
             # -vbr min:1 max:5
             command.extend(["-codec:a", "libfdk_aac", "-vbr", "5"])
         elif config["ac"] == "opus":
-            command.extend(["-codec:a", "libopus", "-vbr", "on", "-b:a", "96K"])
+            command.extend(["-codec:a", "libopus", "-vbr", "1", "-b:a", "96K"])
     else:
         command.extend([f"-codec:a:{audio_index}", "copy"])
 
