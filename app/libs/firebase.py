@@ -37,7 +37,7 @@ class FirebaseDB:
             and self.password
         )
 
-    def refresh_token(self):
+    def refresh(self):
         now_datetime = get_now_datetime()
         if now_datetime > self.refresh_time + timedelta(minutes=10):
             if now_datetime < self.refresh_time + timedelta(minutes=60):
@@ -51,9 +51,9 @@ class FirebaseDB:
             self.refresh_time = now_datetime
 
     def get(self):
-        self.refresh_token()
+        self.refresh()
         return self.db.child("vconvert").get(self.id_token).val()
 
     def set(self, data):
-        self.refresh_token()
+        self.refresh()
         return self.db.child("vconvert").set(data, self.id_token)
