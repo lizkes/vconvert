@@ -15,13 +15,14 @@ def ffmpeg_convert(input_path, temp_path):
     info = Info(input_path)
     video_index = info.match_video_codec(config["vc"], config["bit"])
     audio_index = info.match_audio_codec(config["ac"])
-    input_path_str = input_path.resolve().as_posix()
+    input_path_str = input_path.as_posix()
 
     # check whether format is same
     if (
         get_file_format(input_path) == config["format"]
         and video_index is not None
         and audio_index is not None
+        and config["force_convert"] == "false"
     ):
         logging.info("same format, nothing to do.")
         return input_path
@@ -52,7 +53,7 @@ def ffmpeg_convert(input_path, temp_path):
 
     # pix_fmt: yuv420p yuv422p yuv444p yuvj420p yuvj422p yuvj444p yuv420p10le yuv422p10le yuv444p10le
     # for x265 doc, see https://x265.readthedocs.io/en/default/cli.html#profile-level-tier
-    if video_index is None:
+    if video_index is None or config["force_convert"] == "true":
         if config["vc"] == "h264":
             command.extend(
                 ["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"]
@@ -96,7 +97,7 @@ def ffmpeg_convert(input_path, temp_path):
     else:
         command.extend([f"-codec:v:{video_index}", "copy"])
 
-    if audio_index is None:
+    if audio_index is None or config["force_convert"] == "true":
         if config["ac"] == "aac":
             # -vbr min:1 max:5
             command.extend(["-codec:a", "libfdk_aac", "-vbr", "5"])
@@ -108,7 +109,7 @@ def ffmpeg_convert(input_path, temp_path):
     if config["remove_subtitle"] == "true":
         command.extend(["-sn"])
 
-    command.append(temp_path.resolve().as_posix())
+    command.append(temp_path.as_posix())
     logging.debug(f"execute command: {' '.join(command)}")
 
     # get video duration
@@ -172,7 +173,7 @@ def ffmpeg_convert(input_path, temp_path):
 
 
 def handbrake_convert(input_path, temp_path):
-    input_path_str = input_path.resolve().as_posix()
+    input_path_str = input_path.as_posix()
 
     # build handbrake run command
     command = [
@@ -267,7 +268,7 @@ def handbrake_convert(input_path, temp_path):
             "-i",
             input_path_str,
             "-o",
-            temp_path.resolve().as_posix(),
+            temp_path.as_posix(),
         ]
     )
     logging.debug(f"execute command: {' '.join(command)}")
@@ -338,8 +339,8 @@ def handbrake_convert(input_path, temp_path):
 def burn_sub(input_path, sub_path, temp_path):
     info = Info(input_path)
     audio_index = info.match_audio_codec(config["ac"])
-    input_path_str = input_path.resolve().as_posix()
-    sub_path_str = sub_path.resolve().as_posix()
+    input_path_str = input_path.as_posix()
+    sub_path_str = sub_path.as_posix()
 
     if is_utf16(sub_path):
         logging.info("sub file is utf-16, start convert to utf-8...")
@@ -410,7 +411,7 @@ def burn_sub(input_path, sub_path, temp_path):
 
     command.extend(["-crf", "20"])
 
-    if audio_index is None:
+    if audio_index is None or config["force_convert"] == "true":
         if config["ac"] == "aac":
             # -vbr min:1 max:5
             command.extend(["-codec:a", "libfdk_aac", "-vbr", "5"])
@@ -419,7 +420,7 @@ def burn_sub(input_path, sub_path, temp_path):
     else:
         command.extend([f"-codec:a:{audio_index}", "copy"])
 
-    command.append(temp_path.resolve().as_posix())
+    command.append(temp_path.as_posix())
     logging.debug(f"execute command: {' '.join(command)}")
 
     # start convert

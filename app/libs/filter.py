@@ -209,7 +209,7 @@ class TranscodingFilter:
         #     # rename file if it is video and suffix have upper-case letter
         #     suffix = suffix.lower()
         #     file_path = file_path.rename(
-        #         file_path.stem + "." + suffix).resolve()
+        #         file_path.stem + "." + suffix)
         if file_format in self.SUPPORT_NORMAL_SUFFIXES:
             if tasks.add_task(TranscodingTask(file_path, "normal")):
                 self.now_num += 1

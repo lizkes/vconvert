@@ -33,7 +33,7 @@ def get_temp_path(input_path, format):
             )
     else:
         logging.error(
-            f"input_path is neither a file nor a folder: {input_path.resolve().as_posix()}"
+            f"input_path is neither a file nor a folder: {input_path.as_posix()}"
         )
         return None
 

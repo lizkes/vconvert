@@ -39,23 +39,26 @@ class Tasks:
         self.status = obj["status"]
 
         task_list = list()
-        for task_obj in obj["task_list"]:
+        for task_uuid, task_obj in obj["task_dict"].items():
             if task_obj["otype"] == "transcoding":
                 t = TranscodingTask()
             elif task_obj["otype"] == "burnsub":
                 t = BurnsubTask()
             elif task_obj["otype"] == "task":
                 t = Task()
-            t.from_obj(task_obj)
+            t.from_obj(task_uuid, task_obj)
             task_list.append(t)
         self.task_list = task_list
 
     def to_obj(self):
+        task_dict = dict()
+        for task in self.task_list:
+            task_dict[task.uuid] = task.to_obj()
         obj = {
             "activate_time": self.activate_time,
             "mode": self.mode,
-            "status": self.status.value,
-            "task_list": list(map(lambda x: x.to_obj(), self.task_list)),
+            "status": self.status,
+            "task_dict": task_dict,
         }
         return obj
 
@@ -63,28 +66,35 @@ class Tasks:
         if self.firebase_db:
             self.firebase_db.set(self.to_obj())
 
+    def update_db(self, task):
+        if self.firebase_db:
+            self.firebase_db.update(task.uuid, task.to_obj())
+
     def get_db(self):
         if self.firebase_db:
             self.from_obj(self.firebase_db.get())
 
     def add_task(self, task: Task):
+        if self.firebase_db:
+            self.get_db()
         # check if task is already exist in task_list
         for t in self.task_list:
-            if t.path.resolve().as_posix() == task.path.resolve().as_posix():
+            if str(t.path) == str(task.path):
                 return False
 
         if self.firebase_db:
-            while True:
-                new_task_index = len(self.task_list)
-                self.task_list.append(task)
-                self.status = TasksStatus.NotDone
-                self.save_db()
-                sleep(3)
-                self.get_db()
-                if self.task_list[new_task_index].uuid == config["uuid"]:
+            self.task_list.append(task)
+            self.status = TasksStatus.NotDone
+            self.update_db(task)
+            sleep(3)
+            self.get_db()
+            for t in self.task_list:
+                if str(t.path) == str(task.path) and t.uuid == task.uuid:
                     return True
+            return False
         else:
             self.task_list.append(task)
+            self.status = TasksStatus.NotDone
             return True
 
     def remove_task(self, index=0):
@@ -132,10 +142,10 @@ class Tasks:
         for i, index in enumerate(execute_index_list):
             task = self.task_list[index]
             logging.info(
-                f"[{i + 1}/{len(execute_index_list)}] Start Task: {task.path.resolve().as_posix()}"
+                f"[{i + 1}/{len(execute_index_list)}] Start Task: {task.path.as_posix()}"
             )
 
             task.execute()
-            self.save_db()
+            self.update_db(task)
 
             logging.info(f"Complete Task {i + 1}.")

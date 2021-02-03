@@ -57,3 +57,12 @@ class FirebaseDB:
     def set(self, data):
         self.refresh()
         return self.db.child("vconvert").set(data, self.id_token)
+
+    def update(self, uuid, data):
+        self.refresh()
+        return (
+            self.db.child("vconvert")
+            .child("task_dict")
+            .child(uuid)
+            .set(data, self.id_token)
+        )

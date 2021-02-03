@@ -29,10 +29,10 @@ class Task(ABC):
         return self.__str__()
 
     @abstractmethod
-    def from_obj(self, obj):
+    def from_obj(self, uuid, obj):
+        self.uuid = uuid
         self.path = Path(obj["path"])
         self.status = obj["status"]
-        self.uuid = obj["uuid"]
 
     @abstractmethod
     def to_obj(self):
@@ -40,7 +40,6 @@ class Task(ABC):
             "otype": "task",
             "path": str(self.path),
             "status": self.status,
-            "uuid": self.uuid,
         }
         return obj
 
@@ -67,10 +66,10 @@ class TranscodingTask(Task):
     def __str__(self):
         return f"{{path: {self.path}, type: {self.ttype}, status: {self.status}, uuid: {self.uuid}}}"
 
-    def from_obj(self, obj):
+    def from_obj(self, uuid, obj):
+        self.uuid = uuid
         self.path = Path(obj["path"])
         self.status = obj["status"]
-        self.uuid = obj["uuid"]
         self.ttype = obj["ttype"]
 
     def to_obj(self):
@@ -78,7 +77,6 @@ class TranscodingTask(Task):
             "otype": "transcoding",
             "path": str(self.path),
             "status": self.status,
-            "uuid": self.uuid,
             "ttype": self.ttype,
         }
         return obj
@@ -127,19 +125,18 @@ class BurnsubTask(Task):
     def __str__(self):
         return f"{{path: {self.path}, sub_path: {self.sub_path}, status: {self.status}, uuid: {self.uuid}}}"
 
-    def from_obj(self, obj):
+    def from_obj(self, uuid, obj):
+        self.uuid = uuid
         self.path = Path(obj["path"])
         self.sub_path = Path(obj["sub_path"])
         self.status = obj["status"]
-        self.uuid = obj["uuid"]
 
     def to_obj(self):
         obj = {
             "otype": "burnsub",
             "path": str(self.path),
-            "sub_path": str(self.sub_path),
             "status": self.status,
-            "uuid": self.uuid,
+            "sub_path": str(self.sub_path),
         }
         return obj
 

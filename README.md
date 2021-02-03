@@ -23,6 +23,7 @@ docker run -d \
 + vc：设置转码后文件的视频编码，默认为h264，可选项 h264|h265|vp9
 + ac：设置转码后文件的音频编码，默认为aac，可选项 aac|opus
 + bit: 设置转码后文件的视频位数，默认为8，可选项 8|10
++ force_convert: 设置是否强制转码, 默认为false
 + fb_api_key: 设置firebase项目的网络API密钥, 默认为空，表示不启用
 + fb_project_id: 设置firebase项目的ID, 默认为空，表示不启用
 + fb_db_url: 设置firebase数据库的url, 默认为空，表示不启用
