@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from os import _exit
 from enum import Enum
+from pathlib import Path
 
 from .converter import ffmpeg_convert, handbrake_convert, burn_sub
 from .path import rm, get_temp_path
@@ -16,16 +17,32 @@ class TaskStatus(str, Enum):
 
 
 class Task(ABC):
-    def __init__(self, path, status=TaskStatus.Waiting):
+    def __init__(self, path=None, status=TaskStatus.Waiting):
         self.path = path
         self.status = status
         self.uuid = config["uuid"]
 
     def __str__(self):
-        return f"{{path: {self.path}, status: {self.status}}}"
+        return f"{{path: {self.path}, status: {self.status}, uuid: {self.uuid}}}"
 
     def __repr__(self):
         return self.__str__()
+
+    @abstractmethod
+    def from_obj(self, obj):
+        self.path = Path(obj["path"])
+        self.status = obj["status"]
+        self.uuid = obj["uuid"]
+
+    @abstractmethod
+    def to_obj(self):
+        obj = {
+            "otype": "task",
+            "path": str(self.path),
+            "status": self.status,
+            "uuid": self.uuid,
+        }
+        return obj
 
     @abstractmethod
     def execute(self):
@@ -43,12 +60,28 @@ class Task(ABC):
 
 
 class TranscodingTask(Task):
-    def __init__(self, path, ttype, status=TaskStatus.Waiting):
+    def __init__(self, path=None, ttype=None, status=TaskStatus.Waiting):
         super().__init__(path, status)
         self.ttype = ttype
 
     def __str__(self):
-        return f"{{path: {self.path}, type: {self.ttype}, status: {self.status}}}"
+        return f"{{path: {self.path}, type: {self.ttype}, status: {self.status}, uuid: {self.uuid}}}"
+
+    def from_obj(self, obj):
+        self.path = Path(obj["path"])
+        self.status = obj["status"]
+        self.uuid = obj["uuid"]
+        self.ttype = obj["ttype"]
+
+    def to_obj(self):
+        obj = {
+            "otype": "transcoding",
+            "path": str(self.path),
+            "status": self.status,
+            "uuid": self.uuid,
+            "ttype": self.ttype,
+        }
+        return obj
 
     def execute(self):
         if super().execute() == 1:
@@ -87,14 +120,28 @@ class TranscodingTask(Task):
 
 
 class BurnsubTask(Task):
-    def __init__(self, path, sub_path, status=TaskStatus.Waiting):
+    def __init__(self, path=None, sub_path=None, status=TaskStatus.Waiting):
         super().__init__(path, status)
         self.sub_path = sub_path
 
     def __str__(self):
-        return (
-            f"{{path: {self.path}, sub_path: {self.sub_path}, status: {self.status}}}"
-        )
+        return f"{{path: {self.path}, sub_path: {self.sub_path}, status: {self.status}, uuid: {self.uuid}}}"
+
+    def from_obj(self, obj):
+        self.path = Path(obj["path"])
+        self.sub_path = Path(obj["sub_path"])
+        self.status = obj["status"]
+        self.uuid = obj["uuid"]
+
+    def to_obj(self):
+        obj = {
+            "otype": "burnsub",
+            "path": str(self.path),
+            "sub_path": str(self.sub_path),
+            "status": self.status,
+            "uuid": self.uuid,
+        }
+        return obj
 
     def execute(self):
         if super().execute() == 1:

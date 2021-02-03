@@ -3,7 +3,7 @@ import logging
 
 
 def is_utf16(input_file):
-    with open(input_file, "r+b") as f:
+    with open(input_file, "rb") as f:
         rawdata = f.read()
         result = chardet.detect(rawdata)
         return result["encoding"] == "UTF-16"

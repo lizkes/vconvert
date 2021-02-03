@@ -4,7 +4,7 @@ from datetime import timedelta
 from time import sleep
 
 from .time import strf_datetime, strp_datetime, get_now_datetime
-from .task import Task, TaskStatus
+from .task import Task, TaskStatus, TranscodingTask, BurnsubTask
 from ..env import config
 
 
@@ -37,14 +37,25 @@ class Tasks:
         self.activate_time = obj["activate_time"]
         self.mode = obj["mode"]
         self.status = obj["status"]
-        self.task_list = obj["task_list"]
+
+        task_list = list()
+        for task_obj in obj["task_list"]:
+            if task_obj["otype"] == "transcoding":
+                t = TranscodingTask()
+            elif task_obj["otype"] == "burnsub":
+                t = BurnsubTask()
+            elif task_obj["otype"] == "task":
+                t = Task()
+            t.from_obj(task_obj)
+            task_list.append(t)
+        self.task_list = task_list
 
     def to_obj(self):
         obj = {
             "activate_time": self.activate_time,
             "mode": self.mode,
             "status": self.status.value,
-            "task_list": list(map(lambda x: x.__dict__, self.task_list)),
+            "task_list": list(map(lambda x: x.to_obj(), self.task_list)),
         }
         return obj
 
