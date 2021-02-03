@@ -40,15 +40,16 @@ class Tasks:
         self.status = obj["status"]
 
         task_list = list()
-        for task_uuid, task_obj in obj["task_dict"].items():
-            if task_obj["otype"] == "transcoding":
-                t = TranscodingTask()
-            elif task_obj["otype"] == "burnsub":
-                t = BurnsubTask()
-            elif task_obj["otype"] == "task":
-                t = Task()
-            t.from_obj(task_uuid, task_obj)
-            task_list.append(t)
+        if "task_dict" in obj:
+            for task_uuid, task_obj in obj["task_dict"].items():
+                if task_obj["otype"] == "transcoding":
+                    t = TranscodingTask()
+                elif task_obj["otype"] == "burnsub":
+                    t = BurnsubTask()
+                elif task_obj["otype"] == "task":
+                    t = Task()
+                t.from_obj(task_uuid, task_obj)
+                task_list.append(t)
         self.task_list = task_list
 
     def to_obj(self):
