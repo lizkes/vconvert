@@ -46,6 +46,8 @@ if __name__ == "__main__":
         tasks = Tasks(firebase_db=db)
         if data:
             tasks.from_obj(data)
+        else:
+            tasks.save_db()
 
         tasks.execute_task(execute_number=1)
     else:

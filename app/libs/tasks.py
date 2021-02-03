@@ -26,6 +26,7 @@ class Tasks:
         )
         self.firebase_db = firebase_db
         self.status = TasksStatus.NotDone
+        self.activate_time = strf_datetime()
 
     def __str__(self):
         return (
@@ -126,9 +127,9 @@ class Tasks:
             logging.debug("Tasks all done, Nothing to do")
             return
 
-        self.activate_time = strf_datetime()
         if not self.filter_task(execute_number):
             self.status = TasksStatus.Done
+            self.activate_time = strf_datetime()
             self.save_db()
             logging.debug("Tasks all done, Nothing to do")
             return
