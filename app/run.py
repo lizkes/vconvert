@@ -35,8 +35,8 @@ if __name__ == "__main__":
 
     db = FirebaseDB(
         config["fb_api_key"],
-        config["fb_project_id"],
         config["fb_db_url"],
+        config["fb_project_id"],
         config["fb_email"],
         config["fb_password"],
     )
