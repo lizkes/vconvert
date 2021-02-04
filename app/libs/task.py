@@ -75,8 +75,8 @@ class TranscodingTask(Task):
     def __init__(
         self,
         path=None,
-        status=TaskStatus.Waiting,
         ttype=None,
+        status=TaskStatus.Waiting,
     ):
         super().__init__(path, status)
         self.ttype = ttype
@@ -134,8 +134,8 @@ class BurnsubTask(Task):
     def __init__(
         self,
         path=None,
-        status=TaskStatus.Waiting,
         sub_path=None,
+        status=TaskStatus.Waiting,
     ):
         super().__init__(path, status)
         self.sub_path = sub_path
