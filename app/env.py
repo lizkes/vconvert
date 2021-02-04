@@ -28,4 +28,5 @@ config = {
     "fb_db_url": getenv("fb_db_url", ""),
     "fb_email": getenv("fb_email", ""),
     "fb_password": getenv("fb_password", ""),
+    "firebase_db": None,
 }

@@ -42,8 +42,9 @@ if __name__ == "__main__":
     )
     if db.is_valid():
         db.new()
+        config["firebase_db"] = db
         data = db.get()
-        tasks = Tasks(firebase_db=db)
+        tasks = Tasks()
         if data:
             tasks.from_obj(data)
         else:

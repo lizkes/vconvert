@@ -17,7 +17,11 @@ class TaskStatus(str, Enum):
 
 
 class Task(ABC):
-    def __init__(self, path=None, status=TaskStatus.Waiting):
+    def __init__(
+        self,
+        path=None,
+        status=TaskStatus.Waiting,
+    ):
         self.path = path
         self.status = status
         self.uuid = config["uuid"]
@@ -27,6 +31,15 @@ class Task(ABC):
 
     def __repr__(self):
         return self.__str__()
+
+    def update_db(self):
+        if config["firebase_db"]:
+            config["firebase_db"].update(self.uuid, self.to_obj())
+
+    def set_status(self, status):
+        self.status = status
+        if status == TaskStatus.Done or status == TaskStatus.Error:
+            self.update_db()
 
     @abstractmethod
     def from_obj(self, uuid, obj):
@@ -59,7 +72,12 @@ class Task(ABC):
 
 
 class TranscodingTask(Task):
-    def __init__(self, path=None, ttype=None, status=TaskStatus.Waiting):
+    def __init__(
+        self,
+        path=None,
+        status=TaskStatus.Waiting,
+        ttype=None,
+    ):
         super().__init__(path, status)
         self.ttype = ttype
 
@@ -67,18 +85,13 @@ class TranscodingTask(Task):
         return f"{{path: {self.path}, type: {self.ttype}, status: {self.status}, uuid: {self.uuid}}}"
 
     def from_obj(self, uuid, obj):
-        self.uuid = uuid
-        self.path = Path(obj["path"])
-        self.status = obj["status"]
+        super().from_obj(uuid, obj)
         self.ttype = obj["ttype"]
 
     def to_obj(self):
-        obj = {
-            "otype": "transcoding",
-            "path": str(self.path),
-            "status": self.status,
-            "ttype": self.ttype,
-        }
+        obj = super().to_obj()
+        obj["otype"] = "transcoding"
+        obj["ttype"] = self.ttype
         return obj
 
     def execute(self):
@@ -89,7 +102,7 @@ class TranscodingTask(Task):
         temp_path = get_temp_path(input_path, config["format"])
         if temp_path is None:
             logging.error("can not find temp_path: {self}")
-            self.status = TaskStatus.Error
+            self.set_status(TaskStatus.Error)
             return
 
         try:
@@ -101,24 +114,29 @@ class TranscodingTask(Task):
                 self.path = handbrake_convert(input_path, temp_path)
             else:
                 logging.error(f"unknown task_type: {self.ttype}")
-                self.status = TaskStatus.Error
+                self.set_status(TaskStatus.Error)
                 return
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
-            self.status = TaskStatus.Waiting
+            self.set_status(TaskStatus.Waiting)
             _exit(1)
         except Exception as e:
             logging.error(e)
             rm(temp_path)
-            self.status = TaskStatus.Error
+            self.set_status(TaskStatus.Error)
             _exit(2)
 
-        self.status = TaskStatus.Done
+        self.set_status(TaskStatus.Done)
 
 
 class BurnsubTask(Task):
-    def __init__(self, path=None, sub_path=None, status=TaskStatus.Waiting):
+    def __init__(
+        self,
+        path=None,
+        status=TaskStatus.Waiting,
+        sub_path=None,
+    ):
         super().__init__(path, status)
         self.sub_path = sub_path
 
@@ -126,18 +144,13 @@ class BurnsubTask(Task):
         return f"{{path: {self.path}, sub_path: {self.sub_path}, status: {self.status}, uuid: {self.uuid}}}"
 
     def from_obj(self, uuid, obj):
-        self.uuid = uuid
-        self.path = Path(obj["path"])
+        super().from_obj(uuid, obj)
         self.sub_path = Path(obj["sub_path"])
-        self.status = obj["status"]
 
     def to_obj(self):
-        obj = {
-            "otype": "burnsub",
-            "path": str(self.path),
-            "status": self.status,
-            "sub_path": str(self.sub_path),
-        }
+        obj = super().to_obj()
+        obj["otype"] = "burnsub"
+        obj["sub_path"] = str(self.sub_path)
         return obj
 
     def execute(self):
@@ -148,7 +161,7 @@ class BurnsubTask(Task):
         temp_path = get_temp_path(input_path, config["format"])
         if temp_path is None:
             logging.error("can not find temp_path: {self}")
-            self.status = TaskStatus.Error
+            self.set_status(TaskStatus.Error)
             return
 
         try:
@@ -156,12 +169,12 @@ class BurnsubTask(Task):
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
-            self.status = TaskStatus.Waiting
+            self.set_status(TaskStatus.Waiting)
             _exit(1)
         except Exception as e:
             logging.error(e)
             rm(temp_path)
-            self.status = TaskStatus.Error
+            self.set_status(TaskStatus.Error)
             _exit(2)
 
-        self.status = TaskStatus.Done
+        self.set_status(TaskStatus.Done)

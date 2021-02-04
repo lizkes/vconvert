@@ -18,13 +18,11 @@ class Tasks:
         self,
         task_list=[],
         mode=config["mode"],
-        firebase_db=None,
     ):
         self.mode = mode
         self.task_list = list(
             filter(lambda task: task.status != TaskStatus.Error, task_list)
         )
-        self.firebase_db = firebase_db
         self.status = TasksStatus.NotDone
         self.activate_time = strf_datetime()
 
@@ -65,26 +63,25 @@ class Tasks:
         return obj
 
     def save_db(self):
-        if self.firebase_db:
-            self.firebase_db.set(self.to_obj())
+        if config["firebase_db"]:
+            config["firebase_db"].set(self.to_obj())
 
     def update_db(self, task):
-        if self.firebase_db:
-            self.firebase_db.update(task.uuid, task.to_obj())
+        if config["firebase_db"]:
+            config["firebase_db"].update(task.uuid, task.to_obj())
 
     def get_db(self):
-        if self.firebase_db:
-            self.from_obj(self.firebase_db.get())
+        if config["firebase_db"]:
+            self.from_obj(config["firebase_db"].get())
 
     def add_task(self, task: Task):
-        if self.firebase_db:
-            self.get_db()
+        self.get_db()
         # check if task is already exist in task_list
         for t in self.task_list:
             if str(t.path) == str(task.path):
                 return False
 
-        if self.firebase_db:
+        if config["firebase_db"]:
             self.task_list.append(task)
             self.status = TasksStatus.NotDone
             self.update_db(task)
