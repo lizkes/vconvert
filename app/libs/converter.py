@@ -13,7 +13,8 @@ from ..env import config
 
 def ffmpeg_convert(input_path, temp_path):
     info = Info(input_path)
-    video_index = info.match_video_codec(config["vc"], config["bit"])
+    video_index = info.match_video_codec(config["vc"])
+    video_bit = info.get_bit()
     audio_index = info.match_audio_codec(config["ac"])
     input_path_str = input_path.as_posix()
 
@@ -58,9 +59,9 @@ def ffmpeg_convert(input_path, temp_path):
             command.extend(
                 ["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"]
             )
-            if config["bit"] == "8":
+            if video_bit == "8":
                 command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
-            if config["bit"] == "10":
+            if video_bit == "10":
                 command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
         elif config["vc"] == "h265":
             command.extend(
@@ -71,9 +72,9 @@ def ffmpeg_convert(input_path, temp_path):
                     "medium",
                 ]
             )
-            if config["bit"] == "8":
+            if video_bit == "8":
                 command.extend(["-profile:v", "main"])
-            if config["bit"] == "10":
+            if video_bit == "10":
                 command.extend(["-profile:v", "main10"])
         elif config["vc"] == "vp9":
             command.extend(
@@ -88,9 +89,9 @@ def ffmpeg_convert(input_path, temp_path):
                     "1",
                 ]
             )
-            if config["bit"] == "8":
+            if video_bit == "8":
                 command.extend(["-pix_fmt", "yuv420p"])
-            if config["bit"] == "10":
+            if video_bit == "10":
                 command.extend(["-pix_fmt", "yuv420p10le"])
 
         command.extend(["-crf", config["crf"]])
@@ -187,47 +188,25 @@ def handbrake_convert(input_path, temp_path):
     ]
 
     if config["vc"] == "h264":
-        if config["bit"] == "8":
-            command.extend(
-                [
-                    "--encoder",
-                    "x264",
-                    "--encoder-profile",
-                    "high",
-                    "--encoder-level",
-                    "4.1",
-                ]
-            )
-        elif config["bit"] == "10":
-            command.extend(
-                [
-                    "--encoder",
-                    "x264_10bit",
-                    "--encoder-profile",
-                    "high10",
-                    "--encoder-level",
-                    "4.1",
-                ]
-            )
+        command.extend(
+            [
+                "--encoder",
+                "x264",
+                "--encoder-profile",
+                "high",
+                "--encoder-level",
+                "4.1",
+            ]
+        )
     elif config["vc"] == "h265":
-        if config["bit"] == "8":
-            command.extend(
-                [
-                    "--encoder",
-                    "x265",
-                    "--encoder-profile",
-                    "main",
-                ]
-            )
-        elif config["bit"] == "10":
-            command.extend(
-                [
-                    "--encoder",
-                    "x265_10bit",
-                    "--encoder-profile",
-                    "main10",
-                ]
-            )
+        command.extend(
+            [
+                "--encoder",
+                "x265",
+                "--encoder-profile",
+                "main",
+            ]
+        )
     elif config["vc"] == "vp9":
         command.extend(["--encoder", "VP9"])
 
@@ -338,6 +317,8 @@ def handbrake_convert(input_path, temp_path):
 
 def burn_sub(input_path, sub_path, temp_path):
     info = Info(input_path)
+    info.match_video_codec(config["vc"])
+    video_bit = info.get_bit()
     audio_index = info.match_audio_codec(config["ac"])
     input_path_str = input_path.as_posix()
     sub_path_str = sub_path.as_posix()
@@ -374,9 +355,9 @@ def burn_sub(input_path, sub_path, temp_path):
     # for x265 doc, see https://x265.readthedocs.io/en/default/cli.html#profile-level-tier
     if config["vc"] == "h264":
         command.extend(["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"])
-        if config["bit"] == "8":
+        if video_bit == "8":
             command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
-        if config["bit"] == "10":
+        if video_bit == "10":
             command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
     elif config["vc"] == "h265":
         command.extend(
@@ -387,9 +368,9 @@ def burn_sub(input_path, sub_path, temp_path):
                 "medium",
             ]
         )
-        if config["bit"] == "8":
+        if video_bit == "8":
             command.extend(["-profile:v", "main"])
-        if config["bit"] == "10":
+        if video_bit == "10":
             command.extend(["-profile:v", "main10"])
     elif config["vc"] == "vp9":
         command.extend(
@@ -404,9 +385,9 @@ def burn_sub(input_path, sub_path, temp_path):
                 "1",
             ]
         )
-        if config["bit"] == "8":
+        if video_bit == "8":
             command.extend(["-pix_fmt", "yuv420p"])
-        if config["bit"] == "10":
+        if video_bit == "10":
             command.extend(["-pix_fmt", "yuv420p10le"])
 
     command.extend(["-crf", config["crf"]])

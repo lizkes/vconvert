@@ -22,7 +22,6 @@ docker run -d \
 + format: 设置转码后的文件格式，默认为mkv，可选项 mp4|mkv|webm
 + vc：设置转码后文件的视频编码，默认为h265，可选项 h264|h265|vp9
 + ac：设置转码后文件的音频编码，默认为aac，可选项 aac|opus
-+ bit: 设置转码后文件的视频位数，默认为8，可选项 8|10
 + crf: 设置视频的质量，默认为20，越低越好
 + force_convert: 设置是否强制转码, 默认为false
 + fb_api_key: 设置firebase项目的网络API密钥, 默认为空，表示不启用

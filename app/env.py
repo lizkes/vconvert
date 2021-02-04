@@ -15,7 +15,6 @@ config = {
     # aac|opus
     # aac don't support webm
     "ac": getenv("ac", "aac").lower(),
-    "bit": getenv("bit", "8"),
     "crf": getenv("crf", "20"),
     "force_convert": getenv("force_convert", "false"),
     "input_dir": getenv("input_dir", "/vconvert").lower(),

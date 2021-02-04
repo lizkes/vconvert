@@ -27,14 +27,11 @@ class Info:
         self.video_stream_index = 0
         self.audio_stream_index = 0
 
-    def match_video_codec(self, codec_name, codec_bit):
+    def match_video_codec(self, codec_name):
         stream_index = 0
         for stream in self.streams:
             if stream.get("codec_type") == "video":
-                if (
-                    stream.get("codec_name") == codec_name
-                    and stream.get("bits_per_raw_sample") == codec_bit
-                ):
+                if stream.get("codec_name") == codec_name:
                     self.video_stream_index = stream_index
                     return stream_index
                 else:
@@ -76,3 +73,13 @@ class Info:
                 else:
                     stream_index += 1
         return "yuv420p"
+
+    def get_bit(self):
+        stream_index = 0
+        for stream in self.streams:
+            if stream.get("codec_type") == "video":
+                if stream_index == self.video_stream_index:
+                    return stream.get("bits_per_raw_sample")
+                else:
+                    stream_index += 1
+        return "8"
