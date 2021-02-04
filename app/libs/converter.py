@@ -93,7 +93,7 @@ def ffmpeg_convert(input_path, temp_path):
             if config["bit"] == "10":
                 command.extend(["-pix_fmt", "yuv420p10le"])
 
-        command.extend(["-crf", "20"])
+        command.extend(["-crf", config["crf"]])
     else:
         command.extend([f"-codec:v:{video_index}", "copy"])
 
@@ -234,7 +234,7 @@ def handbrake_convert(input_path, temp_path):
     command.extend(
         [
             "--quality",
-            "20",
+            config["crf"],
             "--encoder-preset",
             "medium",
             # "--align-av",
@@ -409,7 +409,7 @@ def burn_sub(input_path, sub_path, temp_path):
         if config["bit"] == "10":
             command.extend(["-pix_fmt", "yuv420p10le"])
 
-    command.extend(["-crf", "20"])
+    command.extend(["-crf", config["crf"]])
 
     if audio_index is None or config["force_convert"] == "true":
         if config["ac"] == "aac":

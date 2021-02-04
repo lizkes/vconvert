@@ -9,14 +9,14 @@ config = {
     "remove_origin": getenv("remove_origin", "false").lower(),
     "remove_subtitle": getenv("remove_subtitle", "false").lower(),
     # mp4|mkv|webm
-    "format": getenv("format", "mp4").lower(),
+    "format": getenv("format", "mkv").lower(),
     # h264|h265|vp9
-    "vc": getenv("vc", "h264").lower(),
+    "vc": getenv("vc", "h265").lower(),
     # aac|opus
     # aac don't support webm
     "ac": getenv("ac", "aac").lower(),
-    # 8|10 don't support for vp9
     "bit": getenv("bit", "8"),
+    "crf": getenv("crf", "20"),
     "force_convert": getenv("force_convert", "false"),
     "input_dir": getenv("input_dir", "/vconvert").lower(),
     "temp_dir": getenv("temp_dir", "/vconvert").lower(),
