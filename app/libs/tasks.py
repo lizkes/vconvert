@@ -75,7 +75,6 @@ class Tasks:
             self.from_obj(config["firebase_db"].get())
 
     def add_task(self, task: Task):
-        self.get_db()
         # check if task is already exist in task_list
         for t in self.task_list:
             if str(t.path) == str(task.path):
