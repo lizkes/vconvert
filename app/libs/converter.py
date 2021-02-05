@@ -6,7 +6,7 @@ from pathlib import Path
 from shlex import quote
 
 from .path import change_parent_dir, get_file_format, rm
-from .encode import is_utf16, utf16_to_utf8
+from .encode import file_encoding, to_utf8
 from .info import Info
 from ..env import config
 
@@ -322,15 +322,26 @@ def burn_sub(input_path, sub_path, temp_path):
     audio_index = info.match_audio_codec(config["ac"])
     input_path_str = input_path.as_posix()
     sub_path_str = sub_path.as_posix()
+    sub_path_format = sub_path.suffix[1:]
+    sub_file_encoding = file_encoding(sub_path)
 
-    if is_utf16(sub_path):
+    if sub_path_format == "srt":
+        ffmpeg_sub_command = "subtitles"
+    elif sub_path_format == "ass" or sub_path_format == "ssa":
+        ffmpeg_sub_command = "ass"
+    else:
+        logging.error(f"Unrecognized subtitle format: {sub_path_format}")
+        return
+
+    if sub_file_encoding == "UTF-8":
+        temp_sub_path = sub_path
+        logging.info("sub file encoding is UTF-8, no need to convert")
+    else:
         temp_sub_path = change_parent_dir(
             sub_path, config["input_dir"], config["temp_sub_dir"]
         )
-        logging.info("sub file is utf-16, start convert to utf-8...")
-        utf16_to_utf8(sub_path, temp_sub_path)
-    else:
-        temp_sub_path = sub_path
+        logging.info(f"sub file encoding is {sub_file_encoding}, convert to UTF-8...")
+        to_utf8(sub_file_encoding, sub_path, temp_sub_path)
 
     command = [
         "ffmpeg",
@@ -341,7 +352,7 @@ def burn_sub(input_path, sub_path, temp_path):
         "-i",
         input_path_str,
         "-vf",
-        f"subtitles={quote(temp_sub_path.as_posix())}",
+        f"{ffmpeg_sub_command}={quote(temp_sub_path.as_posix())}",
         "-movflags",
         "+faststart",
     ]

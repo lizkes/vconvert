@@ -1,22 +1,20 @@
 import chardet
 import logging
-from time import sleep
 
 
-def is_utf16(input_file):
+def file_encoding(input_file):
     with open(input_file, "rb") as f:
         rawdata = f.read()
         result = chardet.detect(rawdata)
-        return result["encoding"] == "UTF-16"
+        return result["encoding"].upper()
 
 
-def utf16_to_utf8(input_file, output_file):
+def to_utf8(input_file_encoding, input_file, output_file):
     try:
-        with open(input_file, "r", encoding="utf-16") as f1:
+        with open(input_file, "r", encoding=input_file_encoding.lower()) as f1:
             content = f1.read()
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w", encoding="utf-8") as f2:
             f2.write(content)
-        sleep(3)
-    except UnicodeDecodeError:
-        logging.error(f"utf-16 decode error: {str(input_file)}")
+    except UnicodeDecodeError as e:
+        logging.error(f"{str(input_file)} decode error: {e}")
