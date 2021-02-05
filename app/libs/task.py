@@ -4,7 +4,7 @@ from os import _exit
 from enum import Enum
 from pathlib import Path
 
-from .time import strf_datetime
+from .time import get_now_datetime, strf_datetime, strp_datetime
 from .converter import ffmpeg_convert, handbrake_convert, burn_sub
 from .path import rm, get_temp_path
 from ..env import config
@@ -23,13 +23,16 @@ class Task(ABC):
         path=None,
         status=TaskStatus.Waiting,
     ):
-        self.activate_time = strf_datetime()
+        self.activate_time = get_now_datetime()
         self.uuid = config["uuid"]
         self.path = path
         self.status = status
 
     def __str__(self):
-        return f"{{path: {self.path.as_posix()}, status: {self.status}, uuid: {self.uuid}}}"
+        return (
+            f"{{activate_time: {strf_datetime(self.activate_time)}, uuid: {self.uuid},"
+            f"status: {self.status}, path: {str(self.path)}}}"
+        )
 
     def __repr__(self):
         return self.__str__()
@@ -45,7 +48,7 @@ class Task(ABC):
 
     @abstractmethod
     def from_obj(self, uuid, obj):
-        self.activate_time = obj["activate_time"]
+        self.activate_time = strp_datetime(obj["activate_time"])
         self.uuid = uuid
         self.path = Path(obj["path"])
         self.status = obj["status"]
@@ -53,7 +56,7 @@ class Task(ABC):
     @abstractmethod
     def to_obj(self):
         obj = {
-            "activate_time": self.activate_time,
+            "activate_time": strf_datetime(self.activate_time),
             "otype": "task",
             "path": str(self.path),
             "status": self.status,

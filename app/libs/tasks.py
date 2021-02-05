@@ -24,16 +24,16 @@ class Tasks:
             filter(lambda task: task.status != TaskStatus.Error, task_list)
         )
         self.status = TasksStatus.NotDone
-        self.activate_time = strf_datetime()
+        self.activate_time = get_now_datetime()
 
     def __str__(self):
         return (
-            f"{{activate_time: {self.activate_time}, mode: {self.mode},"
+            f"{{activate_time: {strf_datetime(self.activate_time)}, mode: {self.mode},"
             f"status: {self.status}, task_list: {self.task_list}}}"
         )
 
     def from_obj(self, obj):
-        self.activate_time = obj["activate_time"]
+        self.activate_time = strp_datetime(obj["activate_time"])
         self.mode = obj["mode"]
         self.status = obj["status"]
 
@@ -55,7 +55,7 @@ class Tasks:
         for task in self.task_list:
             task_dict[task.uuid] = task.to_obj()
         obj = {
-            "activate_time": self.activate_time,
+            "activate_time": strf_datetime(self.activate_time),
             "mode": self.mode,
             "status": self.status,
             "task_dict": task_dict,
@@ -82,24 +82,31 @@ class Tasks:
         # check if task is already exist in task_list
         for t in self.task_list:
             if str(t.path) == str(task.path):
-                if t.status == TaskStatus.Done or strp_datetime(
-                    t.activate_time
-                ) + timedelta(seconds=int(config["sleep_time"]) > get_now_datetime()):
+                if (
+                    t.status == TaskStatus.Done
+                    or t.activate_time + timedelta(seconds=int(config["sleep_time"]))
+                    > get_now_datetime()
+                ):
                     return False
                 else:
                     self.delete_task(t)
                     break
 
         if config["firebase_db"]:
-            self.task_list.append(task)
-            self.status = TasksStatus.NotDone
             self.update_task(task)
             sleep(3)
             self.get_db()
             for t in self.task_list:
-                if str(t.path) == str(task.path) and t.uuid == task.uuid:
-                    return True
-            return False
+                if (
+                    str(t.path) == str(task.path)
+                    and t.uuid != task.uuid
+                    and t.activate_time < task.activate_time
+                ):
+                    self.delete_task(task)
+                    return False
+            self.task_list.append(task)
+            self.status = TasksStatus.NotDone
+            return True
         else:
             self.task_list.append(task)
             self.status = TasksStatus.NotDone
@@ -128,15 +135,17 @@ class Tasks:
             return BothFilter(execute_number).filte(tasks=self)
 
     def execute_task(self, execute_number=-1):
-        if self.status == TasksStatus.Done and strp_datetime(
-            self.activate_time
-        ) + timedelta(seconds=int(config["sleep_time"]) > get_now_datetime()):
+        if (
+            self.status == TasksStatus.Done
+            and self.activate_time + timedelta(seconds=int(config["sleep_time"]))
+            > get_now_datetime()
+        ):
             logging.debug("Tasks all done, Nothing to do")
             return
 
         if not self.filter_task(execute_number):
             self.status = TasksStatus.Done
-            self.activate_time = strf_datetime()
+            self.activate_time = get_now_datetime()
             self.save_db()
             logging.debug("No new Tasks added, Nothing to do")
             return
