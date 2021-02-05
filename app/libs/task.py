@@ -27,7 +27,7 @@ class Task(ABC):
         self.uuid = config["uuid"]
 
     def __str__(self):
-        return f"{{path: {self.path}, status: {self.status}, uuid: {self.uuid}}}"
+        return f"{{path: {self.path.as_posix()}, status: {self.status}, uuid: {self.uuid}}}"
 
     def __repr__(self):
         return self.__str__()
@@ -122,7 +122,7 @@ class TranscodingTask(Task):
             self.set_status(TaskStatus.Waiting)
             _exit(1)
         except Exception as e:
-            logging.error(e)
+            logging.error(f"unexpected error: {e}")
             rm(temp_path)
             self.set_status(TaskStatus.Error)
             _exit(2)
@@ -172,7 +172,7 @@ class BurnsubTask(Task):
             self.set_status(TaskStatus.Waiting)
             _exit(1)
         except Exception as e:
-            logging.error(e)
+            logging.error(f"unexpected error: {e}")
             rm(temp_path)
             self.set_status(TaskStatus.Error)
             _exit(2)

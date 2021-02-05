@@ -17,4 +17,4 @@ def utf16_to_utf8(input_file, output_file):
         with open(output_file, "w", encoding="utf-8") as f2:
             f2.write(content)
     except UnicodeDecodeError:
-        logging.error(f"utf-16 decode error: {input_file}")
+        logging.error(f"utf-16 decode error: {input_file.as_posix()}")
