@@ -28,10 +28,14 @@ class Info:
         self.audio_stream_index = 0
 
     def match_video_codec(self, codec_name):
+        codec_names = list()
+        codec_names.append(codec_name)
+        if codec_name == "h265":
+            codec_names.append("hevc")
         stream_index = 0
         for stream in self.streams:
             if stream.get("codec_type") == "video":
-                if stream.get("codec_name") == codec_name:
+                if stream.get("codec_name") in codec_names:
                     self.video_stream_index = stream_index
                     return stream_index
                 else:

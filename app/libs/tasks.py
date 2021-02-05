@@ -66,17 +66,17 @@ class Tasks:
         if config["firebase_db"]:
             config["firebase_db"].set(self.to_obj())
 
-    def update_task(self, task):
-        if config["firebase_db"]:
-            config["firebase_db"].update(task.uuid, task.to_obj())
-
-    def delete_task(self, task):
-        if config["firebase_db"]:
-            config["firebase_db"].delete(task.uuid)
-
     def get_db(self):
         if config["firebase_db"]:
             self.from_obj(config["firebase_db"].get())
+
+    def update_db_task(self, task):
+        if config["firebase_db"]:
+            config["firebase_db"].update(task.uuid, task.to_obj())
+
+    def delete_db_task(self, task):
+        if config["firebase_db"]:
+            config["firebase_db"].delete(task.uuid)
 
     def add_task(self, task: Task):
         # check if task is already exist in task_list
@@ -89,22 +89,21 @@ class Tasks:
                 ):
                     return False
                 else:
-                    self.delete_task(t)
+                    self.delete_db_task(t)
                     break
 
         if config["firebase_db"]:
-            self.update_task(task)
+            self.update_db_task(task)
             sleep(3)
             self.get_db()
             for t in self.task_list:
-                if (
-                    str(t.path) == str(task.path)
-                    and t.uuid != task.uuid
-                    and t.activate_time < task.activate_time
-                ):
-                    self.delete_task(task)
-                    return False
-            self.task_list.append(task)
+                if str(t.path) == str(task.path) and t.uuid != task.uuid:
+                    if t.activate_time < task.activate_time:
+                        self.delete_db_task(task)
+                        self.delete_task(task)
+                        return False
+                    else:
+                        self.delete_task(t)
             self.status = TasksStatus.NotDone
             return True
         else:
@@ -112,13 +111,12 @@ class Tasks:
             self.status = TasksStatus.NotDone
             return True
 
-    def remove_task(self, index=0):
-        try:
-            self.task_list.pop(index)
-            return True
-        except IndexError:
-            logging.error(f"Fail to remove task, index {index} is out of range")
-            return False
+    def delete_task(self, task):
+        for i, t in enumerate(self.task_list):
+            if t.uuid == task.uuid:
+                del self.task_list[i]
+                return True
+        return False
 
     def filter_task(self, execute_number=-1):
         if self.mode == "transcoding":
@@ -163,6 +161,6 @@ class Tasks:
             )
 
             task.execute()
-            self.update_task(task)
+            self.update_db_task(task)
 
             logging.info(f"Complete Task {i + 1}.")

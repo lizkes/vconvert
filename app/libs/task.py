@@ -37,14 +37,14 @@ class Task(ABC):
     def __repr__(self):
         return self.__str__()
 
-    def update_task(self):
+    def update_db_task(self):
         if config["firebase_db"]:
             config["firebase_db"].update(self.uuid, self.to_obj())
 
     def set_status(self, status):
         self.status = status
         if status == TaskStatus.Done or status == TaskStatus.Error:
-            self.update_task()
+            self.update_db_task()
 
     @abstractmethod
     def from_obj(self, uuid, obj):

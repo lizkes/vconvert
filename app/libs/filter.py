@@ -24,7 +24,6 @@ class BurnsubFilter:
         "mp2",
         "mpe",
         "mpv",
-        "ogg",
     ]
     SUPPORT_SUB_SUFFIXES = ["ass", "srt"]
 
@@ -82,11 +81,10 @@ class BothFilter:
         "mp2",
         "mpe",
         "mpv",
-        "ogg",
     ]
     SUPPORT_DVD_SUFFIXES = ["m2ts", "mts", "ts", "avchd"]
     SUPPORT_ISO_SUFFIXES = ["iso"]
-    SUPPORT_SUB_SUFFIXES = ["ass", "srt"]
+    SUPPORT_SUB_SUFFIXES = ["ass", "ssa", "srt"]
 
     def __init__(self, execute_number=-1):
         self.now_num = 0
@@ -176,7 +174,6 @@ class TranscodingFilter:
         "mp2",
         "mpe",
         "mpv",
-        "ogg",
     ]
     SUPPORT_DVD_SUFFIXES = ["m2ts", "mts", "ts", "avchd"]
     SUPPORT_ISO_SUFFIXES = ["iso"]
