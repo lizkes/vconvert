@@ -325,7 +325,7 @@ def burn_sub(input_path, sub_path, temp_path):
 
     if is_utf16(sub_path):
         temp_sub_path = change_parent_dir(
-            sub_path, config["input_path"], config["temp_sub_dir"]
+            sub_path, config["input_dir"], config["temp_sub_dir"]
         )
         logging.info("sub file is utf-16, start convert to utf-8...")
         utf16_to_utf8(sub_path, temp_sub_path)
