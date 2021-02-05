@@ -30,6 +30,7 @@ docker run -d \
 + fb_email: 设置firebase验证的邮箱, 默认为空，表示不启用
 + fb_password: 设置firebase验证的密码, 默认为空，表示不启用
 + log_level: 设置docker日志的级别，默认为info，可选项 debug|info|warn|error|critical
++ enable_file_log: 是否启用文件log，默认为true
 
 ### 示例
 ```bash

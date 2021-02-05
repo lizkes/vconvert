@@ -1,38 +1,55 @@
 import sys
+import atexit
 import pprint
 import logging
 import logging.handlers
-from pathlib import Path, PurePath
+from pathlib import Path
 from time import sleep
 
 from .env import config
+from .libs.path import rm
 from .libs.tasks import Tasks
 from .libs.firebase import FirebaseDB
 
 if __name__ == "__main__":
-    Path(config["input_dir"]).mkdir(exist_ok=True)
-    Path(config["temp_dir"]).mkdir(exist_ok=True)
-    Path(config["log_dir"]).mkdir(exist_ok=True)
+    Path(config["input_dir"]).mkdir(parents=True, exist_ok=True)
+    Path(config["temp_dir"]).mkdir(parents=True, exist_ok=True)
+    Path(config["log_dir"]).mkdir(parents=True, exist_ok=True)
 
-    current_path = PurePath(__file__).parent
-    file_handler = logging.handlers.RotatingFileHandler(
-        Path(config["log_dir"]).joinpath("run.log"),
-        maxBytes=10 * 1024 * 1024,
-        backupCount=1,
-        encoding="utf-8",
-    )
-    file_handler.setLevel(logging.DEBUG)
+    # set exit job
+    def exit_handler():
+        rm(Path(config["temp_sub_dir"]))
+        print(f"removed temp sub dir: {config['temp_sub_dir']}")
 
+    atexit.register(exit_handler)
+
+    # init logging
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging._nameToLevel.get(config["log_level"], logging.INFO))
-    # init logging
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt="%y/%m/%d %H:%M:%S",
-        handlers=[file_handler, stream_handler],
-    )
+    if config["enable_file_log"] == "true":
+        file_handler = logging.handlers.RotatingFileHandler(
+            Path(config["log_dir"]).joinpath("run.log"),
+            maxBytes=10 * 1024 * 1024,
+            backupCount=1,
+            encoding="utf-8",
+        )
+        file_handler.setLevel(logging.DEBUG)
 
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            datefmt="%y/%m/%d %H:%M:%S",
+            handlers=[file_handler, stream_handler],
+        )
+    else:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            datefmt="%y/%m/%d %H:%M:%S",
+            handlers=[stream_handler],
+        )
+
+    # init firebasedb
     db = FirebaseDB(
         config["fb_api_key"],
         config["fb_db_url"],

@@ -5,7 +5,7 @@ from shutil import move
 from pathlib import Path
 from shlex import quote
 
-from .path import get_file_format, rm
+from .path import change_parent_dir, get_file_format, rm
 from .encode import is_utf16, utf16_to_utf8
 from .info import Info
 from ..env import config
@@ -152,7 +152,7 @@ def ffmpeg_convert(input_path, temp_path):
                 logging.debug(text)
         if proc.returncode != 0:
             raise subprocess.SubprocessError(
-                "ffmpeg error, check log file for more information."
+                "ffmpeg error, check debug level log for more information."
             )
 
     # cleanup
@@ -283,7 +283,7 @@ def handbrake_convert(input_path, temp_path):
                 logging.debug(text)
         if proc.returncode != 0:
             raise subprocess.SubprocessError(
-                "handbrake error, check log file for more information."
+                "handbrake error, check debug level log for more information."
             )
 
     # cleanup
@@ -324,8 +324,13 @@ def burn_sub(input_path, sub_path, temp_path):
     sub_path_str = sub_path.as_posix()
 
     if is_utf16(sub_path):
+        temp_sub_path = change_parent_dir(
+            sub_path, config["input_path"], config["temp_sub_dir"]
+        )
         logging.info("sub file is utf-16, start convert to utf-8...")
-        utf16_to_utf8(sub_path, sub_path)
+        utf16_to_utf8(sub_path, temp_sub_path)
+    else:
+        temp_sub_path = sub_path
 
     command = [
         "ffmpeg",
@@ -336,7 +341,7 @@ def burn_sub(input_path, sub_path, temp_path):
         "-i",
         input_path_str,
         "-vf",
-        f"subtitles={quote(sub_path_str)}",
+        f"subtitles={quote(temp_sub_path.as_posix())}",
         "-movflags",
         "+faststart",
     ]
@@ -436,7 +441,7 @@ def burn_sub(input_path, sub_path, temp_path):
                 logging.debug(text)
         if proc.returncode != 0:
             raise subprocess.SubprocessError(
-                "ffmpeg error, check log file for more information."
+                "ffmpeg error, check debug level log for more information."
             )
 
     # cleanup

@@ -13,6 +13,7 @@ def utf16_to_utf8(input_file, output_file):
     try:
         with open(input_file, "r", encoding="utf-16") as f1:
             content = f1.read()
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w", encoding="utf-8") as f2:
             f2.write(content)
     except UnicodeDecodeError:

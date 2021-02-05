@@ -6,6 +6,10 @@ from time import sleep
 from ..env import config
 
 
+def change_parent_dir(input_path, before_parent, after_parent):
+    return Path(after_parent).joinpath(input_path.relative_to(before_parent))
+
+
 def get_temp_path(input_path, format):
     def change_file_format(input_path, format):
         if input_path.is_file():
