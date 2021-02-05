@@ -156,11 +156,23 @@ class Tasks:
 
         for i, index in enumerate(execute_index_list):
             task = self.task_list[index]
-            logging.info(
-                f"[{i + 1}/{len(execute_index_list)}] Start Task: {task.path.as_posix()}"
-            )
+            if config["firebase_db"]:
+                logging.debug(
+                    f"[{i + 1}/{len(execute_index_list)}] Start Task: {task.path.as_posix()}"
+                )
+            else:
+                logging.info(
+                    f"[{i + 1}/{len(execute_index_list)}] Start Task: {task.path.as_posix()}"
+                )
 
             task.execute()
             self.update_db_task(task)
 
-            logging.info(f"Complete Task {i + 1}.")
+            if config["firebase_db"]:
+                logging.debug(
+                    f"[{i + 1}/{len(execute_index_list)}] Complete Task: {task.path.as_posix()}"
+                )
+            else:
+                logging.info(
+                    f"[{i + 1}/{len(execute_index_list)}] Complete Task: {task.path.as_posix()}"
+                )

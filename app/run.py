@@ -16,13 +16,6 @@ if __name__ == "__main__":
     Path(config["temp_dir"]).mkdir(parents=True, exist_ok=True)
     Path(config["log_dir"]).mkdir(parents=True, exist_ok=True)
 
-    # set exit job
-    def exit_handler():
-        rm(Path(config["temp_sub_dir"]))
-        print(f"removed temp sub dir: {config['temp_sub_dir']}")
-
-    atexit.register(exit_handler)
-
     # init logging
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging._nameToLevel.get(config["log_level"], logging.INFO))
@@ -48,6 +41,13 @@ if __name__ == "__main__":
             datefmt="%y/%m/%d %H:%M:%S",
             handlers=[stream_handler],
         )
+
+    # set exit job
+    def exit_handler():
+        rm(Path(config["temp_sub_dir"]))
+        logging.debug(f"removed temp sub dir: {config['temp_sub_dir']}")
+
+    atexit.register(exit_handler)
 
     # init firebasedb
     db = FirebaseDB(

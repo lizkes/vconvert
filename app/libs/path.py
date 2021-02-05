@@ -66,7 +66,7 @@ def rm(path):
                 else:
                     logging.warn(f"{path} is not dir or file, can't delete.")
             else:
-                logging.info(f"{path} is not exist, can't delete.")
+                logging.debug(f"{path} is not exist, can't delete.")
             break
         except PermissionError as e:
             try_count -= 1

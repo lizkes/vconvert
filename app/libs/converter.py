@@ -130,8 +130,8 @@ def ffmpeg_convert(input_path, temp_path):
         encoding="utf-8",
         errors="ignore",
     ) as proc:
-        log_count = 120
-        log_interval = 120
+        log_count = 100
+        log_interval = 100
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
@@ -145,7 +145,7 @@ def ffmpeg_convert(input_path, temp_path):
             elif text.startswith("frame="):
                 if log_count == log_interval:
                     log_count = 0
-                    logging.debug(text)
+                    logging.info(text)
                 else:
                     log_count += 1
             else:
@@ -159,16 +159,16 @@ def ffmpeg_convert(input_path, temp_path):
     if config["remove_origin"] == "true":
         # remove origin file
         rm(input_path)
-        logging.info(f"Deleted origin file {input_path_str}")
+        logging.debug(f"Deleted origin file {input_path_str}")
     else:
         # rename and keep origin file
         input_path.rename(input_path_str + ".origin")
-        logging.info(f"Renamed origin file to {input_path_str}.origin")
+        logging.debug(f"Renamed origin file to {input_path_str}.origin")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
-    logging.info(f"Moved temp file to {dist_path.as_posix()}")
+    logging.debug(f"Moved temp file to {dist_path.as_posix()}")
 
     return Path(dist_path)
 
@@ -261,8 +261,8 @@ def handbrake_convert(input_path, temp_path):
         encoding="utf-8",
         errors="ignore",
     ) as proc:
-        log_count = 120
-        log_interval = 120
+        log_count = 100
+        log_interval = 100
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
@@ -276,7 +276,7 @@ def handbrake_convert(input_path, temp_path):
             elif text.startswith("frame="):
                 if log_count == log_interval:
                     log_count = 0
-                    logging.debug(text)
+                    logging.info(text)
                 else:
                     log_count += 1
             else:
@@ -290,16 +290,16 @@ def handbrake_convert(input_path, temp_path):
     if config["remove_origin"] == "true":
         # remove origin file
         rm(input_path)
-        logging.info(f"Deleted origin file {input_path_str}")
+        logging.debug(f"Deleted origin file {input_path_str}")
     else:
         # rename and keep origin file
         input_path.rename(input_path_str + ".origin")
-        logging.info(f"Renamed origin file to {input_path_str}.origin")
+        logging.debug(f"Renamed origin file to {input_path_str}.origin")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
-    logging.info(f"Moved temp file to {dist_path.as_posix()}")
+    logging.debug(f"Moved temp file to {dist_path.as_posix()}")
 
     return Path(dist_path)
 
@@ -335,12 +335,12 @@ def burn_sub(input_path, sub_path, temp_path):
 
     if sub_file_encoding == "UTF-8":
         temp_sub_path = sub_path
-        logging.info("sub file encoding is UTF-8, no need to convert")
+        logging.debug("sub file encoding is UTF-8, no need to convert")
     else:
         temp_sub_path = change_parent_dir(
             sub_path, config["input_dir"], config["temp_sub_dir"]
         )
-        logging.info(f"sub file encoding is {sub_file_encoding}, convert to UTF-8...")
+        logging.debug(f"sub file encoding is {sub_file_encoding}, convert to UTF-8...")
         to_utf8(sub_file_encoding, sub_path, temp_sub_path)
 
     command = [
@@ -430,8 +430,8 @@ def burn_sub(input_path, sub_path, temp_path):
         encoding="utf-8",
         errors="ignore",
     ) as proc:
-        log_count = 120
-        log_interval = 120
+        log_count = 100
+        log_interval = 100
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
@@ -445,7 +445,7 @@ def burn_sub(input_path, sub_path, temp_path):
             elif text.startswith("frame="):
                 if log_count == log_interval:
                     log_count = 0
-                    logging.debug(text)
+                    logging.info(text)
                 else:
                     log_count += 1
             else:
@@ -459,19 +459,19 @@ def burn_sub(input_path, sub_path, temp_path):
     if config["remove_origin"] == "true":
         # remove origin file
         rm(input_path)
-        logging.info(f"Deleted origin file {input_path_str}")
+        logging.debug(f"Deleted origin file {input_path_str}")
         rm(sub_path)
-        logging.info(f"Deleted origin file {sub_path_str}")
+        logging.debug(f"Deleted origin file {sub_path_str}")
     else:
         # rename and keep origin file
         input_path.rename(f"{input_path_str}.origin")
-        logging.info(f"Renamed origin file to {input_path_str}.origin")
+        logging.debug(f"Renamed origin file to {input_path_str}.origin")
         sub_path.rename(f"{sub_path_str}.origin")
-        logging.info(f"Renamed origin file to {sub_path_str}.origin")
+        logging.debug(f"Renamed origin file to {sub_path_str}.origin")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
-    logging.info(f"Moved temp file to {dist_path.as_posix()}")
+    logging.debug(f"Moved temp file to {dist_path.as_posix()}")
 
     return Path(dist_path)
