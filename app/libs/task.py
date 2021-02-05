@@ -4,6 +4,7 @@ from os import _exit
 from enum import Enum
 from pathlib import Path
 
+from .time import strf_datetime
 from .converter import ffmpeg_convert, handbrake_convert, burn_sub
 from .path import rm, get_temp_path
 from ..env import config
@@ -22,9 +23,10 @@ class Task(ABC):
         path=None,
         status=TaskStatus.Waiting,
     ):
+        self.activate_time = strf_datetime()
+        self.uuid = config["uuid"]
         self.path = path
         self.status = status
-        self.uuid = config["uuid"]
 
     def __str__(self):
         return f"{{path: {self.path.as_posix()}, status: {self.status}, uuid: {self.uuid}}}"
@@ -32,17 +34,18 @@ class Task(ABC):
     def __repr__(self):
         return self.__str__()
 
-    def update_db(self):
+    def update_task(self):
         if config["firebase_db"]:
             config["firebase_db"].update(self.uuid, self.to_obj())
 
     def set_status(self, status):
         self.status = status
         if status == TaskStatus.Done or status == TaskStatus.Error:
-            self.update_db()
+            self.update_task()
 
     @abstractmethod
     def from_obj(self, uuid, obj):
+        self.activate_time = obj["activate_time"]
         self.uuid = uuid
         self.path = Path(obj["path"])
         self.status = obj["status"]
@@ -50,6 +53,7 @@ class Task(ABC):
     @abstractmethod
     def to_obj(self):
         obj = {
+            "activate_time": self.activate_time,
             "otype": "task",
             "path": str(self.path),
             "status": self.status,

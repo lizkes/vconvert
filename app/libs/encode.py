@@ -1,5 +1,6 @@
 import chardet
 import logging
+from time import sleep
 
 
 def is_utf16(input_file):
@@ -16,5 +17,6 @@ def utf16_to_utf8(input_file, output_file):
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w", encoding="utf-8") as f2:
             f2.write(content)
+        sleep(3)
     except UnicodeDecodeError:
-        logging.error(f"utf-16 decode error: {input_file.as_posix()}")
+        logging.error(f"utf-16 decode error: {str(input_file)}")

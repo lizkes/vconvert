@@ -66,9 +66,13 @@ class Tasks:
         if config["firebase_db"]:
             config["firebase_db"].set(self.to_obj())
 
-    def update_db(self, task):
+    def update_task(self, task):
         if config["firebase_db"]:
             config["firebase_db"].update(task.uuid, task.to_obj())
+
+    def delete_task(self, task):
+        if config["firebase_db"]:
+            config["firebase_db"].delete(task.uuid)
 
     def get_db(self):
         if config["firebase_db"]:
@@ -78,12 +82,18 @@ class Tasks:
         # check if task is already exist in task_list
         for t in self.task_list:
             if str(t.path) == str(task.path):
-                return False
+                if t.status == TaskStatus.Done or strp_datetime(
+                    t.activate_time
+                ) + timedelta(seconds=int(config["sleep_time"]) > get_now_datetime()):
+                    return False
+                else:
+                    self.delete_task(t)
+                    break
 
         if config["firebase_db"]:
             self.task_list.append(task)
             self.status = TasksStatus.NotDone
-            self.update_db(task)
+            self.update_task(task)
             sleep(3)
             self.get_db()
             for t in self.task_list:
@@ -120,7 +130,7 @@ class Tasks:
     def execute_task(self, execute_number=-1):
         if self.status == TasksStatus.Done and strp_datetime(
             self.activate_time
-        ) + timedelta(seconds=int(config["sleep_time"]) < get_now_datetime()):
+        ) + timedelta(seconds=int(config["sleep_time"]) > get_now_datetime()):
             logging.debug("Tasks all done, Nothing to do")
             return
 
@@ -128,7 +138,7 @@ class Tasks:
             self.status = TasksStatus.Done
             self.activate_time = strf_datetime()
             self.save_db()
-            logging.debug("Tasks all done, Nothing to do")
+            logging.debug("No new Tasks added, Nothing to do")
             return
 
         execute_index_list = list()
@@ -144,6 +154,6 @@ class Tasks:
             )
 
             task.execute()
-            self.update_db(task)
+            self.update_task(task)
 
             logging.info(f"Complete Task {i + 1}.")

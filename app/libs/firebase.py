@@ -66,3 +66,7 @@ class FirebaseDB:
             .child(uuid)
             .set(data, self.id_token)
         )
+
+    def delete(self, uuid):
+        self.refresh()
+        return self.db.child("vconvert").child("task_dict").child(uuid).remove()
