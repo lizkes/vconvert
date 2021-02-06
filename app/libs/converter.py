@@ -73,9 +73,9 @@ def ffmpeg_convert(input_path, temp_path):
                 ]
             )
             if video_bit == "8":
-                command.extend(["-profile:v", "main"])
+                command.extend(["-profile:v", "main", "-pix_fmt", "yuv420p"])
             if video_bit == "10":
-                command.extend(["-profile:v", "main10"])
+                command.extend(["-profile:v", "main10", "-pix_fmt", "yuv420p10le"])
         elif config["vc"] == "vp9":
             command.extend(
                 [
