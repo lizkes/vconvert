@@ -64,14 +64,7 @@ def ffmpeg_convert(input_path, temp_path):
             if video_bit == "10":
                 command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
         elif config["vc"] == "h265":
-            command.extend(
-                [
-                    "-codec:v",
-                    "libx265",
-                    "-preset",
-                    "medium",
-                ]
-            )
+            command.extend(["-codec:v", "libx265", "-preset", "medium"])
             if video_bit == "8":
                 command.extend(["-profile:v", "main", "-pix_fmt", "yuv420p"])
             if video_bit == "10":
