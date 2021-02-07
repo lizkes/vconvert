@@ -97,19 +97,14 @@ class Tasks:
             self.update_db_task(task)
             sleep(randrange(2, 6))  # sleep 2-5s
             self.get_db()
-            logging.debug(task)
-            logging.debug(self.task_list)
             for t in self.task_list:
                 if str(t.path) == str(task.path) and t.uuid != task.uuid:
                     if t.activate_time < task.activate_time:
                         self.delete_db_task(task)
-                        logging.debug("delete task from remote db")
                         self.delete_task(task)
-                        logging.debug("delete task from local data")
                         return False
                     else:
                         self.delete_task(t)
-                        logging.debug("delete task from local data")
             self.status = TasksStatus.NotDone
             return True
         else:
