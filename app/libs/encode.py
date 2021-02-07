@@ -10,6 +10,8 @@ def file_encoding(input_file):
 
 
 def to_utf8(input_file_encoding, input_file, output_file):
+    if input_file_encoding.lower() == "gb2312":
+        input_file_encoding = "gb18030"
     try:
         with open(input_file, "r", encoding=input_file_encoding.lower()) as f1:
             content = f1.read()
