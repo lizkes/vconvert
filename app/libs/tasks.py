@@ -95,7 +95,7 @@ class Tasks:
 
         if config["firebase_db"]:
             self.update_db_task(task)
-            sleep(randrange(5, 31))
+            sleep(randrange(2, 6))  # sleep 2-5s
             self.get_db()
             logging.debug(task)
             logging.debug(self.task_list)
