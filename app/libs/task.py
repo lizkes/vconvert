@@ -89,7 +89,10 @@ class TranscodingTask(Task):
         self.ttype = ttype
 
     def __str__(self):
-        return f"{{path: {self.path}, type: {self.ttype}, status: {self.status}, uuid: {self.uuid}}}"
+        return (
+            f"{{activate_time: {strf_datetime(self.activate_time)}, uuid: {self.uuid},"
+            f"status: {self.status}, path: {str(self.path)}, type: {self.ttype}}}"
+        )
 
     def from_obj(self, uuid, obj):
         super().from_obj(uuid, obj)
@@ -148,7 +151,10 @@ class BurnsubTask(Task):
         self.sub_path = sub_path
 
     def __str__(self):
-        return f"{{path: {self.path}, sub_path: {self.sub_path}, status: {self.status}, uuid: {self.uuid}}}"
+        return (
+            f"{{activate_time: {strf_datetime(self.activate_time)}, uuid: {self.uuid},"
+            f"status: {self.status}, path: {str(self.path)}, sub_path: {self.sub_path}}}"
+        )
 
     def from_obj(self, uuid, obj):
         super().from_obj(uuid, obj)
