@@ -40,6 +40,8 @@ def ffmpeg_convert(input_path, temp_path):
         input_path_str,
         "-movflags",
         "+faststart",
+        "-max_muxing_queue_size",
+        "1024",
     ]
 
     if config["format"] == "mkv":
@@ -348,6 +350,8 @@ def burn_sub(input_path, sub_path, temp_path):
         f"{ffmpeg_sub_command}={quote(temp_sub_path.as_posix())}",
         "-movflags",
         "+faststart",
+        "-max_muxing_queue_size",
+        "1024",
     ]
 
     if config["format"] == "mkv":
