@@ -67,7 +67,6 @@ if __name__ == "__main__":
         else:
             tasks.save_db()
 
-        logging.debug(tasks.__str__())
         tasks.execute_task(execute_number=1)
     else:
         # 输出环境变量

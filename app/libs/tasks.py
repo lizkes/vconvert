@@ -2,6 +2,7 @@ import logging
 from enum import Enum
 from datetime import timedelta
 from time import sleep
+from random import randrange
 
 from .time import strf_datetime, strp_datetime, get_now_datetime
 from .task import Task, TaskStatus, TranscodingTask, BurnsubTask
@@ -94,16 +95,21 @@ class Tasks:
 
         if config["firebase_db"]:
             self.update_db_task(task)
-            sleep(3)
+            sleep(randrange(5, 31))
             self.get_db()
+            logging.debug(task)
+            logging.debug(self.task_list)
             for t in self.task_list:
                 if str(t.path) == str(task.path) and t.uuid != task.uuid:
                     if t.activate_time < task.activate_time:
                         self.delete_db_task(task)
+                        logging.debug("delete task from remote db")
                         self.delete_task(task)
+                        logging.debug("delete task from local data")
                         return False
                     else:
                         self.delete_task(t)
+                        logging.debug("delete task from local data")
             self.status = TasksStatus.NotDone
             return True
         else:
@@ -166,7 +172,6 @@ class Tasks:
                 )
 
             task.execute()
-            self.update_db_task(task)
 
             if config["firebase_db"]:
                 logging.debug(
