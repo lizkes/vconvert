@@ -124,7 +124,7 @@ def ffmpeg_convert(input_path, temp_path):
         errors="ignore",
     ) as proc:
         log_count = 50
-        log_interval = 57
+        log_interval = 58
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
@@ -255,7 +255,7 @@ def handbrake_convert(input_path, temp_path):
         errors="ignore",
     ) as proc:
         log_count = 50
-        log_interval = 57
+        log_interval = 58
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
@@ -426,7 +426,7 @@ def burn_sub(input_path, sub_path, temp_path):
         errors="ignore",
     ) as proc:
         log_count = 50
-        log_interval = 57
+        log_interval = 58
         while True:
             text = proc.stdout.readline().rstrip("\n")
             if text == "":
