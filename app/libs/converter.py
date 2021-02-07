@@ -57,17 +57,17 @@ def ffmpeg_convert(input_path, temp_path):
     if video_index is None or config["force_convert"] == "true":
         if config["vc"] == "h264":
             command.extend(
-                ["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"]
+                ["-codec:v", "libx264", "-level:v", "4.1", "-preset", config["preset"]]
             )
             if video_bit == "8":
                 command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
-            if video_bit == "10":
+            elif video_bit == "10":
                 command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
         elif config["vc"] == "h265":
-            command.extend(["-codec:v", "libx265", "-preset", "medium"])
+            command.extend(["-codec:v", "libx265", "-preset", config["preset"]])
             if video_bit == "8":
                 command.extend(["-profile:v", "main", "-pix_fmt", "yuv420p"])
-            if video_bit == "10":
+            elif video_bit == "10":
                 command.extend(["-profile:v", "main10", "-pix_fmt", "yuv420p10le"])
         elif config["vc"] == "vp9":
             command.extend(
@@ -84,7 +84,7 @@ def ffmpeg_convert(input_path, temp_path):
             )
             if video_bit == "8":
                 command.extend(["-pix_fmt", "yuv420p"])
-            if video_bit == "10":
+            elif video_bit == "10":
                 command.extend(["-pix_fmt", "yuv420p10le"])
 
         command.extend(["-crf", config["crf"]])
@@ -208,7 +208,7 @@ def handbrake_convert(input_path, temp_path):
             "--quality",
             config["crf"],
             "--encoder-preset",
-            "medium",
+            config["preset"],
             # "--align-av",
             "--auto-anamorphic",
             "--keep-display-aspect",
@@ -363,10 +363,12 @@ def burn_sub(input_path, sub_path, temp_path):
     # pix_fmt: yuv420p yuv422p yuv444p yuvj420p yuvj422p yuvj444p yuv420p10le yuv422p10le yuv444p10le
     # for x265 doc, see https://x265.readthedocs.io/en/default/cli.html#profile-level-tier
     if config["vc"] == "h264":
-        command.extend(["-codec:v", "libx264", "-level:v", "4.1", "-preset", "medium"])
+        command.extend(
+            ["-codec:v", "libx264", "-level:v", "4.1", "-preset", config["preset"]]
+        )
         if video_bit == "8":
             command.extend(["-profile:v", "high", "-pix_fmt", "yuv420p"])
-        if video_bit == "10":
+        elif video_bit == "10":
             command.extend(["-profile:v", "high10", "-pix_fmt", "yuv420p10le"])
     elif config["vc"] == "h265":
         command.extend(
@@ -374,13 +376,13 @@ def burn_sub(input_path, sub_path, temp_path):
                 "-codec:v",
                 "libx265",
                 "-preset",
-                "medium",
+                config["preset"],
             ]
         )
         if video_bit == "8":
-            command.extend(["-profile:v", "main"])
-        if video_bit == "10":
-            command.extend(["-profile:v", "main10"])
+            command.extend(["-profile:v", "main", "-pix_fmt", "yuv420p"])
+        elif video_bit == "10":
+            command.extend(["-profile:v", "main10", "-pix_fmt", "yuv420p10le"])
     elif config["vc"] == "vp9":
         command.extend(
             [
@@ -396,7 +398,7 @@ def burn_sub(input_path, sub_path, temp_path):
         )
         if video_bit == "8":
             command.extend(["-pix_fmt", "yuv420p"])
-        if video_bit == "10":
+        elif video_bit == "10":
             command.extend(["-pix_fmt", "yuv420p10le"])
 
     command.extend(["-crf", config["crf"]])

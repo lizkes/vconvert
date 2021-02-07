@@ -20,9 +20,10 @@ docker run -d \
 + remove_origin: 是否移除源文件，默认为false
 + remove_subtitle: 是否移除文件内的字幕, 默认为false
 + format: 设置转码后的文件格式，默认为mkv，可选项 mp4|mkv|webm
-+ vc：设置转码后文件的视频编码，默认为h265，可选项 h264|h265|vp9
++ vc：设置转码后文件的视频编码，默认为h264，可选项 h264|h265|vp9
 + ac：设置转码后文件的音频编码，默认为aac，可选项 aac|opus
-+ crf: 设置视频的质量，默认为20，越低越好
++ crf: 设置视频的质量，默认为23，越低越好, 建议18-28
++ preset: 设置视频的编码预设，默认为veryfast，可选项 ultrafast|superfast|veryfast|faster|fast|medium|slow|veryslow
 + force_convert: 设置是否强制转码, 默认为false
 + fb_api_key: 设置firebase项目的网络API密钥, 默认为空，表示不启用
 + fb_project_id: 设置firebase项目的ID, 默认为空，表示不启用

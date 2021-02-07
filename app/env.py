@@ -11,11 +11,12 @@ config = {
     # mp4|mkv|webm
     "format": getenv("format", "mkv").lower(),
     # h264|h265|vp9
-    "vc": getenv("vc", "h265").lower(),
+    "vc": getenv("vc", "h264").lower(),
     # aac|opus
     # aac don't support webm
     "ac": getenv("ac", "aac").lower(),
-    "crf": getenv("crf", "20"),
+    "crf": getenv("crf", "23"),
+    "preset": getenv("preset", "veryfast"),
     "force_convert": getenv("force_convert", "false"),
     "input_dir": getenv("input_dir", "/vconvert").lower(),
     "temp_dir": getenv("temp_dir", "/vconvert").lower(),
