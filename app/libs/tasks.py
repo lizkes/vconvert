@@ -43,14 +43,14 @@ class Tasks:
                 task_list.append(t)
         self.task_list = task_list
 
-    def from_task_obj(self, task_obj):
+    def from_task_obj(self, index, task_obj):
         if task_obj["otype"] == "transcoding":
             t = TranscodingTask()
         elif task_obj["otype"] == "burnsub":
             t = BurnsubTask()
         elif task_obj["otype"] == "task":
             t = Task()
-        t.from_obj(0, task_obj)
+        t.from_obj(index, task_obj)
         self.task_list.append(t)
 
     def to_obj(self):

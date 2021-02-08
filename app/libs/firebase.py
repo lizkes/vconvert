@@ -3,7 +3,8 @@ import logging
 import pyrebase
 from datetime import timedelta
 
-from .time import get_now_datetime, strp_datetime, sleep
+from .time import get_now_datetime, strp_datetime, strf_datetime, sleep
+from .task import TaskStatus
 from ..env import config
 
 
@@ -97,8 +98,7 @@ class Firebase:
             sleep(3, 5)
             if self.get(f"task_dict/{run_index}/uuid") == config["uuid"]:
                 task_obj = self.get(f"task_dict/{run_index}")
-                task_obj["index"] = run_index
-                return task_obj
+                return run_index, task_obj
             retry_number += 1
             sleep(1, retry_number * 10)
 
@@ -112,7 +112,13 @@ class Firebase:
         )
 
     def update_task_status(self, task_index, status):
-        return self.update(status, f"task_dict/{task_index}/status")
+        return self.update(
+            {
+                "activate_time": strf_datetime(),
+                "status": status,
+            },
+            f"task_dict/{task_index}",
+        )
 
     def update_append(self, before_data, after_data):
         append_dict = dict()
@@ -136,8 +142,6 @@ class Firebase:
             )
 
     def remove_unuseful(self, data):
-        from .task import TaskStatus
-
         now_datetime = get_now_datetime()
         sleep_time_delta = timedelta(seconds=int(config["sleep_time"]))
         for index, task in data["task_dict"].items():

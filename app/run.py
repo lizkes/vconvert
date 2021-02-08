@@ -82,9 +82,9 @@ if __name__ == "__main__":
 
         # init firebase
         if g_var["db"]:
-            task_obj = g_var["db"].get_seize_data()
+            index, task_obj = g_var["db"].get_seize_data()
             tasks = Tasks()
-            tasks.from_task_obj(task_obj)
+            tasks.from_task_obj(index, task_obj)
 
             tasks.execute_remote_task()
             sys.exit()
