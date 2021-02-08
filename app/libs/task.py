@@ -7,7 +7,7 @@ from pathlib import Path
 from .time import get_now_datetime, strf_datetime, strp_datetime
 from .converter import ffmpeg_convert, handbrake_convert, burn_sub
 from .path import rm, get_temp_path
-from ..env import config
+from ..env import config, g_var
 
 
 class TaskStatus(str, Enum):
@@ -27,7 +27,7 @@ class Task(ABC):
         self.index = index
         self.activate_time = get_now_datetime()
         self.status = status
-        self.uuid = config["uuid"]
+        self.uuid = ""
         self.path = path
 
     def __str__(self):
@@ -38,6 +38,15 @@ class Task(ABC):
 
     def __repr__(self):
         return self.__str__()
+
+    def update_task(self):
+        if g_var["db"]:
+            g_var["db"].update_task(*self.to_obj())
+
+    def update_status(self, status):
+        self.status = status
+        if g_var["db"]:
+            g_var["db"].update_task_status(self.index, self.status)
 
     @abstractmethod
     def from_obj(self, index, obj):
@@ -70,7 +79,7 @@ class Task(ABC):
             logging.error("This task is error, do nothing: {self}")
             raise ValueError
 
-        self.status = TaskStatus.Running
+        self.update_status(TaskStatus.Running)
 
 
 class TranscodingTask(Task):
@@ -109,14 +118,14 @@ class TranscodingTask(Task):
         input_path = self.path
         if not input_path.exists():
             logging.error("can not find input_path: {self}")
-            self.status = TaskStatus.Error
+            self.update_status(TaskStatus.Error)
             return
 
         try:
             temp_path = get_temp_path(input_path, config["format"])
         except FileNotFoundError:
             logging.error("can not find temp_path: {self}")
-            self.status = TaskStatus.Error
+            self.update_status(TaskStatus.Error)
             return
 
         try:
@@ -128,20 +137,21 @@ class TranscodingTask(Task):
                 self.path = handbrake_convert(input_path, temp_path)
             else:
                 logging.error(f"unknown task_type: {self.ttype}")
-                self.status = TaskStatus.Error
+                self.update_status(TaskStatus.Error)
                 return
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
-            self.status = TaskStatus.Waiting
+            self.update_status(TaskStatus.Waiting)
             _exit(1)
         except Exception as e:
             logging.error(f"unexpected error: {e}")
             rm(temp_path)
-            self.status = TaskStatus.Error
+            self.update_status(TaskStatus.Error)
             return
 
         self.status = TaskStatus.Done
+        self.update_task()
 
 
 class BurnsubTask(Task):
@@ -182,18 +192,18 @@ class BurnsubTask(Task):
 
         if not input_path.exists():
             logging.error("can not find input_path: {self}")
-            self.status = TaskStatus.Error
+            self.update_status(TaskStatus.Error)
             return
         if not sub_path.exists():
             logging.error("can not find sub_path: {self}")
-            self.status = TaskStatus.Error
+            self.update_status(TaskStatus.Error)
             return
 
         try:
             temp_path = get_temp_path(input_path, config["format"])
         except FileNotFoundError:
             logging.error("can not find temp_path: {self}")
-            self.status = TaskStatus.Error
+            self.update_status(TaskStatus.Error)
             return
 
         try:
@@ -201,7 +211,7 @@ class BurnsubTask(Task):
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
-            self.status = TaskStatus.Waiting
+            self.update_status(TaskStatus.Waiting)
             _exit(1)
         except Exception as e:
             logging.error(f"unexpected error: {e}")
@@ -210,3 +220,4 @@ class BurnsubTask(Task):
             return
 
         self.status = TaskStatus.Done
+        self.update_task()

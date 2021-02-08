@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from .time import get_now_datetime
 from .task import Task, TaskStatus, TranscodingTask, BurnsubTask
-from ..env import config, g_var
+from ..env import config
 
 
 class Tasks:
@@ -28,6 +28,7 @@ class Tasks:
     def from_obj(self, obj):
         self.mode = obj["mode"]
         self.next_index = obj["next_index"]
+        self.task_length = obj["task_length"]
 
         task_list = list()
         if "task_dict" in obj:
@@ -40,7 +41,6 @@ class Tasks:
                     t = Task()
                 t.from_obj(task_index, task_obj)
                 task_list.append(t)
-        self.task_length = len(task_list)
         self.task_list = task_list
 
     def from_task_obj(self, task_obj):
@@ -79,7 +79,8 @@ class Tasks:
                     return False
                 break
 
-        task.index = len(self.task_list)
+        task.index = self.task_length
+        self.task_length += 1
         self.task_list.append(task)
         return True
 
@@ -102,7 +103,6 @@ class Tasks:
         logging.debug(f"Start Task: {task.path.as_posix()}")
 
         task.execute()
-        g_var["db"].update_task(*task.to_obj())
 
         logging.debug(f"Complete Task: {task.path.as_posix()}")
 

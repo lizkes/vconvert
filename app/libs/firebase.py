@@ -103,7 +103,16 @@ class Firebase:
             sleep(1, retry_number * 10)
 
     def update_task(self, task_index, task_obj):
-        return self.update(task_obj, f"task_dict/{task_index}")
+        return self.update(
+            {
+                "path": task_obj["path"],
+                "status": task_obj["status"],
+            },
+            f"task_dict/{task_index}",
+        )
+
+    def update_task_status(self, task_index, status):
+        return self.update(status, f"task_dict/{task_index}/status")
 
     def update_append(self, before_data, after_data):
         append_dict = dict()

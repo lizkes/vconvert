@@ -6,11 +6,11 @@ def get_now_datetime():
 
 
 def strf_datetime(time: datetime = get_now_datetime()):
-    return datetime.strftime(time, "%y/%m/%d %H:%M:%S:%f")
+    return datetime.strftime(time, "%y/%m/%d %H:%M:%S")
 
 
 def strp_datetime(time_str: str):
-    return datetime.strptime(time_str, "%y/%m/%d %H:%M:%S:%f").replace(
+    return datetime.strptime(time_str, "%y/%m/%d %H:%M:%S").replace(
         tzinfo=timezone(timedelta(hours=8))
     )
 
