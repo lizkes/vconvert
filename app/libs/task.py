@@ -118,7 +118,7 @@ class TranscodingTask(Task):
         input_path = self.path
         if not input_path.exists():
             logging.error("can not find input_path: {self}")
-            self.update_status(TaskStatus.Error)
+            self.update_status(TaskStatus.Done)
             return
 
         try:
@@ -192,11 +192,11 @@ class BurnsubTask(Task):
 
         if not input_path.exists():
             logging.error("can not find input_path: {self}")
-            self.update_status(TaskStatus.Error)
+            self.update_status(TaskStatus.Done)
             return
         if not sub_path.exists():
             logging.error("can not find sub_path: {self}")
-            self.update_status(TaskStatus.Error)
+            self.update_status(TaskStatus.Done)
             return
 
         try:
