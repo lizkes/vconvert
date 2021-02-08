@@ -1,3 +1,4 @@
-.vscode
-logs
+/.vscode
+/logs
+/app/test
 **/__pycache__

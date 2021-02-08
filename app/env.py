@@ -3,16 +3,15 @@ from uuid import uuid4
 
 config = {
     "mode": getenv("mode", "transcoding"),
-    "sleep_time": getenv("sleep_time", "1800"),
+    "storage": getenv("storage", "none"),
+    "role": getenv("role", "runner"),
+    "sleep_time": getenv("sleep_time", "3600"),
     # only for ffmpeg
     "threads": getenv("threads", "0"),
     "remove_origin": getenv("remove_origin", "false").lower(),
     "remove_subtitle": getenv("remove_subtitle", "false").lower(),
-    # mp4|mkv|webm
     "format": getenv("format", "mkv").lower(),
-    # h264|h265|vp9
     "vc": getenv("vc", "h264").lower(),
-    # aac|opus
     # aac don't support webm
     "ac": getenv("ac", "aac").lower(),
     "crf": getenv("crf", "23"),
@@ -30,5 +29,6 @@ config = {
     "fb_db_url": getenv("fb_db_url", ""),
     "fb_email": getenv("fb_email", ""),
     "fb_password": getenv("fb_password", ""),
-    "firebase_db": None,
 }
+
+g_var = {"db": None}

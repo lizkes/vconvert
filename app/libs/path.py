@@ -39,7 +39,7 @@ def get_temp_path(input_path, format):
         logging.error(
             f"input_path is neither a file nor a folder: {input_path.as_posix()}"
         )
-        return None
+        raise FileNotFoundError
 
 
 def get_file_format(input_path):

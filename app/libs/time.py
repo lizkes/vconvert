@@ -6,11 +6,11 @@ def get_now_datetime():
 
 
 def strf_datetime(time: datetime = get_now_datetime()):
-    return datetime.strftime(time, "%Y/%m/%d %H:%M:%S:%f")
+    return datetime.strftime(time, "%y/%m/%d %H:%M:%S:%f")
 
 
 def strp_datetime(time_str: str):
-    return datetime.strptime(time_str, "%Y/%m/%d %H:%M:%S:%f").replace(
+    return datetime.strptime(time_str, "%y/%m/%d %H:%M:%S:%f").replace(
         tzinfo=timezone(timedelta(hours=8))
     )
 
@@ -21,3 +21,10 @@ def strf_time(time: datetime = get_now_datetime()):
 
 def strf_date(time: datetime = get_now_datetime()):
     return datetime.strftime(time, "%y%m%d")
+
+
+def sleep(min=1, max=3):
+    import time
+    from random import randint
+
+    time.sleep(randint(min, max))

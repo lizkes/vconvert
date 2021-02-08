@@ -21,59 +21,54 @@ class Task(ABC):
     def __init__(
         self,
         path=None,
+        index=0,
         status=TaskStatus.Waiting,
     ):
+        self.index = index
         self.activate_time = get_now_datetime()
+        self.status = status
         self.uuid = config["uuid"]
         self.path = path
-        self.status = status
 
     def __str__(self):
         return (
-            f"{{activate_time: {strf_datetime(self.activate_time)}, uuid: {self.uuid},"
-            f"status: {self.status}, path: {str(self.path)}}}"
+            f"{{index: {self.index}, activate_time: {strf_datetime(self.activate_time)},"
+            f"status: {self.status}, uuid: {self.uuid}, path: {self.path}}}"
         )
 
     def __repr__(self):
         return self.__str__()
 
-    def update_db_task(self):
-        if config["firebase_db"]:
-            config["firebase_db"].update(self.uuid, self.to_obj())
-
-    def set_status(self, status):
-        self.status = status
-        if status == TaskStatus.Done or status == TaskStatus.Error:
-            self.update_db_task()
-
     @abstractmethod
-    def from_obj(self, uuid, obj):
+    def from_obj(self, index, obj):
+        self.index = index
         self.activate_time = strp_datetime(obj["activate_time"])
-        self.uuid = uuid
-        self.path = Path(obj["path"])
         self.status = obj["status"]
+        self.uuid = obj["uuid"]
+        self.path = Path(obj["path"])
 
     @abstractmethod
     def to_obj(self):
         obj = {
-            "activate_time": strf_datetime(self.activate_time),
             "otype": "task",
-            "path": str(self.path),
+            "activate_time": strf_datetime(self.activate_time),
             "status": self.status,
+            "uuid": self.uuid,
+            "path": str(self.path),
         }
-        return obj
+        return self.index, obj
 
     @abstractmethod
     def execute(self):
         if self.status == TaskStatus.Done:
             logging.error(f"This task is already done, do nothing: {self}")
-            return 1
+            raise ValueError
         elif self.status == TaskStatus.Running:
             logging.error("This task is already running, do nothing: {self}")
-            return 1
+            raise ValueError
         elif self.status == TaskStatus.Error:
             logging.error("This task is error, do nothing: {self}")
-            return 1
+            raise ValueError
 
         self.status = TaskStatus.Running
 
@@ -83,36 +78,45 @@ class TranscodingTask(Task):
         self,
         path=None,
         ttype=None,
+        index=0,
         status=TaskStatus.Waiting,
     ):
-        super().__init__(path, status)
+        super().__init__(path, index, status)
         self.ttype = ttype
 
     def __str__(self):
         return (
-            f"{{activate_time: {strf_datetime(self.activate_time)}, uuid: {self.uuid},"
-            f"status: {self.status}, path: {str(self.path)}, type: {self.ttype}}}"
+            f"{{index: {self.index}, activate_time: {strf_datetime(self.activate_time)},"
+            f"status: {self.status}, uuid: {self.uuid}, path: {self.path}, type: {self.ttype}}}"
         )
 
-    def from_obj(self, uuid, obj):
-        super().from_obj(uuid, obj)
+    def from_obj(self, index, obj):
+        super().from_obj(index, obj)
         self.ttype = obj["ttype"]
 
     def to_obj(self):
-        obj = super().to_obj()
+        index, obj = super().to_obj()
         obj["otype"] = "transcoding"
         obj["ttype"] = self.ttype
-        return obj
+        return index, obj
 
     def execute(self):
-        if super().execute() == 1:
+        try:
+            super().execute()
+        except ValueError:
             return
 
         input_path = self.path
-        temp_path = get_temp_path(input_path, config["format"])
-        if temp_path is None:
+        if not input_path.exists():
+            logging.error("can not find input_path: {self}")
+            self.status = TaskStatus.Error
+            return
+
+        try:
+            temp_path = get_temp_path(input_path, config["format"])
+        except FileNotFoundError:
             logging.error("can not find temp_path: {self}")
-            self.set_status(TaskStatus.Error)
+            self.status = TaskStatus.Error
             return
 
         try:
@@ -124,20 +128,20 @@ class TranscodingTask(Task):
                 self.path = handbrake_convert(input_path, temp_path)
             else:
                 logging.error(f"unknown task_type: {self.ttype}")
-                self.set_status(TaskStatus.Error)
+                self.status = TaskStatus.Error
                 return
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
-            self.set_status(TaskStatus.Waiting)
+            self.status = TaskStatus.Waiting
             _exit(1)
         except Exception as e:
             logging.error(f"unexpected error: {e}")
             rm(temp_path)
-            self.set_status(TaskStatus.Error)
-            _exit(2)
+            self.status = TaskStatus.Error
+            return
 
-        self.set_status(TaskStatus.Done)
+        self.status = TaskStatus.Done
 
 
 class BurnsubTask(Task):
@@ -145,49 +149,64 @@ class BurnsubTask(Task):
         self,
         path=None,
         sub_path=None,
+        index=0,
         status=TaskStatus.Waiting,
     ):
-        super().__init__(path, status)
+        super().__init__(path, index, status)
         self.sub_path = sub_path
 
     def __str__(self):
         return (
-            f"{{activate_time: {strf_datetime(self.activate_time)}, uuid: {self.uuid},"
-            f"status: {self.status}, path: {str(self.path)}, sub_path: {self.sub_path}}}"
+            f"{{index: {self.index}, activate_time: {strf_datetime(self.activate_time)},"
+            f"status: {self.status}, uuid: {self.uuid}, path: {self.path}, sub_path: {self.sub_path}}}"
         )
 
-    def from_obj(self, uuid, obj):
-        super().from_obj(uuid, obj)
+    def from_obj(self, index, obj):
+        super().from_obj(index, obj)
         self.sub_path = Path(obj["sub_path"])
 
     def to_obj(self):
-        obj = super().to_obj()
+        index, obj = super().to_obj()
         obj["otype"] = "burnsub"
         obj["sub_path"] = str(self.sub_path)
-        return obj
+        return index, obj
 
     def execute(self):
-        if super().execute() == 1:
+        try:
+            super().execute()
+        except ValueError:
             return
 
         input_path = self.path
-        temp_path = get_temp_path(input_path, config["format"])
-        if temp_path is None:
-            logging.error("can not find temp_path: {self}")
-            self.set_status(TaskStatus.Error)
+        sub_path = self.sub_path
+
+        if not input_path.exists():
+            logging.error("can not find input_path: {self}")
+            self.status = TaskStatus.Error
+            return
+        if not sub_path.exists():
+            logging.error("can not find sub_path: {self}")
+            self.status = TaskStatus.Error
             return
 
         try:
-            self.path = burn_sub(input_path, self.sub_path, temp_path)
+            temp_path = get_temp_path(input_path, config["format"])
+        except FileNotFoundError:
+            logging.error("can not find temp_path: {self}")
+            self.status = TaskStatus.Error
+            return
+
+        try:
+            self.path = burn_sub(input_path, sub_path, temp_path)
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
-            self.set_status(TaskStatus.Waiting)
+            self.status = TaskStatus.Waiting
             _exit(1)
         except Exception as e:
             logging.error(f"unexpected error: {e}")
             rm(temp_path)
-            self.set_status(TaskStatus.Error)
-            _exit(2)
+            self.status = TaskStatus.Error
+            return
 
-        self.set_status(TaskStatus.Done)
+        self.status = TaskStatus.Done

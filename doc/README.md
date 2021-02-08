@@ -16,7 +16,9 @@ docker run -d \
 可以添加各种环境变量来控制转码的行为
 + threads: 转码使用的线程数，默认为CPU核心数
 + mode: 运行模式，默认为transcoding，可选项 transcoding|burnsub|both
-+ sleep_time: 休眠时间，默认为1800，单位为秒
++ storage: 运行使用的外部存储，默认为none，可选项 none|firebase
++ role: 运行角色，默认为runner，可选项 indexer|runner
++ sleep_time: 休眠时间，默认为3600，单位为秒
 + remove_origin: 是否移除源文件，默认为false
 + remove_subtitle: 是否移除文件内的字幕, 默认为false
 + format: 设置转码后的文件格式，默认为mkv，可选项 mp4|mkv|webm
