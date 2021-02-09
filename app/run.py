@@ -84,7 +84,7 @@ if __name__ == "__main__":
         if g_var["db"]:
             # firebase storage
             DoNothingCount = 0
-            while DoNothingCount < config["max_do_nothing"]:
+            while DoNothingCount < int(config["max_do_nothing"]):
                 index, task_obj = g_var["db"].get_seize_data()
                 tasks = Tasks()
                 tasks.from_task_obj(index, task_obj)
@@ -92,9 +92,10 @@ if __name__ == "__main__":
 
                 if return_code == TaskReturnCode.DoNothing:
                     DoNothingCount += 1
+                elif return_code == TaskReturnCode.Error:
+                    sys.exit(1)
                 else:
-                    break
-            sys.exit(0)
+                    sys.exit(0)
         else:
             # none storage
             logging.debug(f"\n{pprint.pformat(config, indent=2)}")
@@ -102,4 +103,4 @@ if __name__ == "__main__":
             tasks = Tasks()
             while True:
                 tasks.execute_local_task()
-                sleep(config["sleep_time"])
+                sleep(float(config["sleep_time"]))

@@ -73,7 +73,7 @@ class Tasks:
                 if (
                     t.status == TaskStatus.Waiting
                     or t.status == TaskStatus.Done
-                    or t.activate_time + timedelta(seconds=config["sleep_time"])
+                    or t.activate_time + timedelta(seconds=int(config["sleep_time"]))
                     > get_now_datetime()
                 ):
                     return False
