@@ -31,8 +31,8 @@ class Tasks:
         self.task_length = obj["task_length"]
 
         task_list = list()
-        if "task_dict" in obj:
-            for task_index, task_obj in enumerate(obj["task_dict"]):
+        if "task_list" in obj:
+            for task_index, task_obj in enumerate(obj["task_list"]):
                 if task_obj["otype"] == "transcoding":
                     t = TranscodingTask()
                 elif task_obj["otype"] == "burnsub":
@@ -62,7 +62,7 @@ class Tasks:
             "mode": self.mode,
             "next_index": self.next_index,
             "task_length": self.task_length,
-            "task_dict": task_dict,
+            "task_list": task_dict,
         }
         return obj
 

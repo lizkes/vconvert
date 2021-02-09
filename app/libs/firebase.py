@@ -92,12 +92,12 @@ class Firebase:
             self.update(
                 {
                     "next_index": next_index,
-                    f"task_dict/{run_index}/uuid": config["uuid"],
+                    f"task_list/{run_index}/uuid": config["uuid"],
                 }
             )
             sleep(3, 5)
-            if self.get(f"task_dict/{run_index}/uuid") == config["uuid"]:
-                task_obj = self.get(f"task_dict/{run_index}")
+            if self.get(f"task_list/{run_index}/uuid") == config["uuid"]:
+                task_obj = self.get(f"task_list/{run_index}")
                 return run_index, task_obj
             retry_number += 1
             sleep(1, retry_number * 10)
@@ -108,7 +108,7 @@ class Firebase:
                 "path": task_obj["path"],
                 "status": task_obj["status"],
             },
-            f"task_dict/{task_index}",
+            f"task_list/{task_index}",
         )
 
     def update_task_status(self, task_index, status):
@@ -117,38 +117,38 @@ class Firebase:
                 "activate_time": strf_datetime(),
                 "status": status,
             },
-            f"task_dict/{task_index}",
+            f"task_list/{task_index}",
         )
 
     def update_append(self, before_data, after_data):
         append_dict = dict()
         for i in range(before_data["task_length"], after_data["task_length"]):
-            append_dict[str(i)] = after_data["task_dict"][str(i)]
+            append_dict[str(i)] = after_data["task_list"][i]
 
         if before_data["next_index"] == -1:
             return self.update(
                 {
                     "next_index": before_data["task_length"],
                     "task_length": after_data["task_length"],
-                    "task_dict": append_dict,
+                    "task_list": append_dict,
                 }
             )
         else:
             return self.update(
                 {
                     "task_length": after_data["task_length"],
-                    "task_dict": append_dict,
+                    "task_list": append_dict,
                 }
             )
 
     def remove_unuseful(self, data):
         now_datetime = get_now_datetime()
         sleep_time_delta = timedelta(seconds=int(config["sleep_time"]))
-        for index, task in data["task_dict"].items():
+        for index, task in enumerate(data["task_list"]):
             if (
                 task["status"] == TaskStatus.Error
                 or task["status"] == TaskStatus.Running
             ) and strp_datetime(
                 task["activate_time"]
             ) + sleep_time_delta < now_datetime:
-                self.remove(index, "task_dict")
+                self.remove(index, "task_list")
