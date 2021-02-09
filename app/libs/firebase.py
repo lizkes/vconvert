@@ -126,20 +126,16 @@ class Firebase:
             append_dict[str(i)] = after_data["task_list"][i]
 
         if before_data["next_index"] == -1:
-            return self.update(
+            self.update(append_dict, "task_list")
+            self.update(
                 {
                     "next_index": before_data["task_length"],
                     "task_length": after_data["task_length"],
-                    "task_list": append_dict,
                 }
             )
         else:
-            return self.update(
-                {
-                    "task_length": after_data["task_length"],
-                    "task_list": append_dict,
-                }
-            )
+            self.update(append_dict, "task_list")
+            self.set(after_data["task_length"], "task_length")
 
     def remove_unuseful(self, data):
         now_datetime = get_now_datetime()
