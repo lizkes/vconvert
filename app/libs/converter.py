@@ -26,7 +26,7 @@ def ffmpeg_convert(input_path, temp_path):
         and config["force_convert"] == "false"
     ):
         logging.info("same format, nothing to do.")
-        return input_path
+        return False
 
     # build ffmpeg run command
     # sn mean not subtitle stream
@@ -51,7 +51,7 @@ def ffmpeg_convert(input_path, temp_path):
     elif config["format"] == "webm":
         command.extend(["-f", "webm"])
 
-    if config["threads"] != "0":
+    if config["threads"] != 0:
         command.extend(["-threads", config["threads"]])
 
     # pix_fmt: yuv420p yuv422p yuv444p yuvj420p yuvj422p yuvj444p yuv420p10le yuv422p10le yuv444p10le
@@ -361,7 +361,7 @@ def burn_sub(input_path, sub_path, temp_path):
     elif config["format"] == "webm":
         command.extend(["-f", "webm"])
 
-    if config["threads"] != "0":
+    if config["threads"] != 0:
         command.extend(["-threads", config["threads"]])
 
     # pix_fmt: yuv420p yuv422p yuv444p yuvj420p yuvj422p yuvj444p yuv420p10le yuv422p10le yuv444p10le

@@ -73,7 +73,7 @@ class Tasks:
                 if (
                     t.status == TaskStatus.Waiting
                     or t.status == TaskStatus.Done
-                    or t.activate_time + timedelta(seconds=int(config["sleep_time"]))
+                    or t.activate_time + timedelta(seconds=config["sleep_time"])
                     > get_now_datetime()
                 ):
                     return False
@@ -103,9 +103,11 @@ class Tasks:
         logging.debug(f"Start Task: {str(task.path)}")
         logging.info(f"Current index: {task.index}")
 
-        task.execute()
+        result = task.execute()
 
         logging.debug(f"Complete Task: {str(task.path)}")
+
+        return result
 
     def execute_local_task(self, execute_number=-1):
         if not self.filter_task(execute_number):

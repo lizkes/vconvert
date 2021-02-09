@@ -19,6 +19,7 @@ docker run -d \
 + storage: 运行使用的外部存储，默认为none，可选项 none|firebase
 + role: 运行角色，默认为runner，可选项 indexer|runner
 + sleep_time: 休眠时间，默认为3600，单位为秒
++ max_do_thing: firebase模式下遇到相同格式的重复运行数，默认为10
 + remove_origin: 是否移除源文件，默认为false
 + remove_subtitle: 是否移除文件内的字幕, 默认为false
 + format: 设置转码后的文件格式，默认为mkv，可选项 mp4|mkv|webm

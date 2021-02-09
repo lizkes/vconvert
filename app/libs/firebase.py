@@ -139,7 +139,7 @@ class Firebase:
 
     def remove_unuseful(self, data):
         now_datetime = get_now_datetime()
-        sleep_time_delta = timedelta(seconds=int(config["sleep_time"]))
+        sleep_time_delta = timedelta(seconds=config["sleep_time"])
         for index, task in enumerate(data["task_list"]):
             if (
                 task["status"] == TaskStatus.Error

@@ -8,6 +8,7 @@ from time import sleep
 
 from .env import config, g_var
 from .libs.path import rm
+from .libs.task import TaskReturnCode
 from .libs.tasks import Tasks
 from .libs.firebase import Firebase
 
@@ -80,14 +81,20 @@ if __name__ == "__main__":
 
         atexit.register(exit_handler)
 
-        # init firebase
         if g_var["db"]:
-            index, task_obj = g_var["db"].get_seize_data()
-            tasks = Tasks()
-            tasks.from_task_obj(index, task_obj)
+            # firebase storage
+            DoNothingCount = 0
+            while DoNothingCount < config["max_do_nothing"]:
+                index, task_obj = g_var["db"].get_seize_data()
+                tasks = Tasks()
+                tasks.from_task_obj(index, task_obj)
+                return_code = tasks.execute_remote_task()
 
-            tasks.execute_remote_task()
-            sys.exit()
+                if return_code == TaskReturnCode.DoNothing:
+                    DoNothingCount += 1
+                else:
+                    break
+            sys.exit(0)
         else:
             # none storage
             logging.debug(f"\n{pprint.pformat(config, indent=2)}")
@@ -95,4 +102,4 @@ if __name__ == "__main__":
             tasks = Tasks()
             while True:
                 tasks.execute_local_task()
-                sleep(float(config["sleep_time"]))
+                sleep(config["sleep_time"])

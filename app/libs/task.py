@@ -17,6 +17,12 @@ class TaskStatus(str, Enum):
     Error = "error"
 
 
+class TaskReturnCode(str, Enum):
+    DoNothing = "do_nothing"
+    Error = "error"
+    Complete = "complete"
+
+
 class Task(ABC):
     def __init__(
         self,
@@ -113,24 +119,28 @@ class TranscodingTask(Task):
         try:
             super().execute()
         except ValueError:
-            return
+            return TaskReturnCode.Error
 
         input_path = self.path
         if not input_path.exists():
             logging.error("can not find input_path: {self}")
             self.update_status(TaskStatus.Done)
-            return
+            return TaskReturnCode.Error
 
         try:
             temp_path = get_temp_path(input_path, config["format"])
         except FileNotFoundError:
             logging.error("can not find temp_path: {self}")
             self.update_status(TaskStatus.Error)
-            return
+            return TaskReturnCode.Error
 
         try:
             if self.ttype == "normal":
-                self.path = ffmpeg_convert(input_path, temp_path)
+                result = ffmpeg_convert(input_path, temp_path)
+                if result is False:
+                    self.update_status(TaskStatus.Done)
+                    return TaskReturnCode.DoNothing
+                self.path = result
             elif (
                 self.ttype == "dvd" or self.ttype == "dvd-folder" or self.ttype == "iso"
             ):
@@ -138,7 +148,7 @@ class TranscodingTask(Task):
             else:
                 logging.error(f"unknown task_type: {self.ttype}")
                 self.update_status(TaskStatus.Error)
-                return
+                return TaskReturnCode.Error
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
@@ -148,10 +158,11 @@ class TranscodingTask(Task):
             logging.error(f"unexpected error: {e}")
             rm(temp_path)
             self.update_status(TaskStatus.Error)
-            return
+            return TaskReturnCode.Error
 
         self.status = TaskStatus.Done
         self.update_task()
+        return TaskReturnCode.Complete
 
 
 class BurnsubTask(Task):
@@ -185,7 +196,7 @@ class BurnsubTask(Task):
         try:
             super().execute()
         except ValueError:
-            return
+            return TaskReturnCode.Error
 
         input_path = self.path
         sub_path = self.sub_path
@@ -193,18 +204,18 @@ class BurnsubTask(Task):
         if not input_path.exists():
             logging.error("can not find input_path: {self}")
             self.update_status(TaskStatus.Done)
-            return
+            return TaskReturnCode.Error
         if not sub_path.exists():
             logging.error("can not find sub_path: {self}")
             self.update_status(TaskStatus.Done)
-            return
+            return TaskReturnCode.Error
 
         try:
             temp_path = get_temp_path(input_path, config["format"])
         except FileNotFoundError:
             logging.error("can not find temp_path: {self}")
             self.update_status(TaskStatus.Error)
-            return
+            return TaskReturnCode.Error
 
         try:
             self.path = burn_sub(input_path, sub_path, temp_path)
@@ -217,7 +228,8 @@ class BurnsubTask(Task):
             logging.error(f"unexpected error: {e}")
             rm(temp_path)
             self.status = TaskStatus.Error
-            return
+            return TaskReturnCode.Error
 
         self.status = TaskStatus.Done
         self.update_task()
+        return TaskReturnCode.Complete
