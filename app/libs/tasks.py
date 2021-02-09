@@ -32,7 +32,7 @@ class Tasks:
 
         task_list = list()
         if "task_dict" in obj:
-            for task_index, task_obj in obj["task_dict"].items():
+            for task_index, task_obj in enumerate(obj["task_dict"]):
                 if task_obj["otype"] == "transcoding":
                     t = TranscodingTask()
                 elif task_obj["otype"] == "burnsub":
