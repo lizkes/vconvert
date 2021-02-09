@@ -100,11 +100,12 @@ class Tasks:
 
     def execute_remote_task(self):
         task = self.task_list[0]
-        logging.debug(f"Start Task: {task.path.as_posix()}")
+        logging.debug(f"Start Task: {str(task.path)}")
+        logging.info(f"Current index: {task.index}")
 
         task.execute()
 
-        logging.debug(f"Complete Task: {task.path.as_posix()}")
+        logging.debug(f"Complete Task: {str(task.path)}")
 
     def execute_local_task(self, execute_number=-1):
         if not self.filter_task(execute_number):
@@ -114,12 +115,10 @@ class Tasks:
         execute_list = self.task_list[0:execute_number]
 
         for i, task in enumerate(execute_list):
-            logging.info(
-                f"[{i + 1}/{len(execute_list)}] Start Task: {task.path.as_posix()}"
-            )
+            logging.info(f"[{i + 1}/{len(execute_list)}] Start Task: {str(task.path)}")
 
             task.execute()
 
             logging.info(
-                f"[{i + 1}/{len(execute_list)}] Complete Task: {task.path.as_posix()}"
+                f"[{i + 1}/{len(execute_list)}] Complete Task: {str(task.path)}"
             )
