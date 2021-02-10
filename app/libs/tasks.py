@@ -109,7 +109,7 @@ class Tasks:
 
         if result == TaskReturnCode.Complete:
             check_traffic_in_github_action()
-            if not task.path.is_exist():
+            if not task.path.exists():
                 logging.ERROR(
                     f"Output file was not uploaded successfully: {str(task.path)}"
                 )

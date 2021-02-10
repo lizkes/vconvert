@@ -47,7 +47,7 @@ def transmissionrate(dev, direction, timestep):
 
 def check_traffic_in_github_action():
     byterate = transmissionrate("eth0", "tx", 10) / 10
-    logging.debug(f"upload byterate: {pretty_size(byterate)}")
+    logging.debug(f"upload byterate: {pretty_size(byterate)}/s")
     while byterate > 16 * 1024:  # 16KB/s
         byterate = transmissionrate("eth0", "tx", 10) / 10
-        print(f"upload byterate: {pretty_size(byterate)}")
+        logging.debug(f"upload byterate: {pretty_size(byterate)}/s")
