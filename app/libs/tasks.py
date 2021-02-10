@@ -1,8 +1,10 @@
+import sys
 import logging
 from datetime import timedelta
 
 from .time import get_now_datetime
-from .task import Task, TaskStatus, TranscodingTask, BurnsubTask
+from .task import Task, TaskStatus, TranscodingTask, BurnsubTask, TaskReturnCode
+from .traffic import check_traffic_in_github_action
 from ..env import config
 
 
@@ -104,6 +106,15 @@ class Tasks:
         logging.info(f"Current index: {task.index}")
 
         result = task.execute()
+
+        if result == TaskReturnCode.Complete:
+            check_traffic_in_github_action()
+            if not task.path.is_exist():
+                logging.ERROR(
+                    f"Output file was not uploaded successfully: {str(task.path)}"
+                )
+                task.update_status(TaskStatus.Error)
+                sys.exit(1)
 
         logging.debug(f"Complete Task: {str(task.path)}")
 
