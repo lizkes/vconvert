@@ -9,7 +9,7 @@ config = {
     # default 10GB
     "limit_size": getenv("max_do_nothing", "10737418240"),
     "max_do_nothing": getenv("max_do_nothing", "10"),
-    "rclone_log_path": getenv("rclone_log_path", "/rclone.conf"),
+    "rclone_log_path": getenv("rclone_log_path", "/rclone.log"),
     # only for ffmpeg
     "threads": getenv("threads", "0"),
     "remove_origin": getenv("remove_origin", "false").lower(),
