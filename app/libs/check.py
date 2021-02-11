@@ -9,7 +9,7 @@ def search(file_path):
     upload_success_number = content.count("upload succeeded")
     logging.debug(f"start_upload_number: {start_upload_number}")
     logging.debug(f"upload_success_number: {upload_success_number}")
-    return start_upload_number == upload_success_number
+    return start_upload_number != 0 and start_upload_number == upload_success_number
 
 
 # 1000 seconds
