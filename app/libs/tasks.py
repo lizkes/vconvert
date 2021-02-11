@@ -1,10 +1,12 @@
 import sys
 import logging
+from pathlib import Path
 from datetime import timedelta
 
 from .time import get_now_datetime
+from .path import rm
 from .task import Task, TaskStatus, TranscodingTask, BurnsubTask, TaskReturnCode
-from .traffic import check_traffic_in_github_action
+from .check import check_upload_success
 from ..env import config
 
 
@@ -81,10 +83,16 @@ class Tasks:
                     return False
                 break
 
-        task.index = self.task_length
-        self.task_length += 1
-        self.task_list.append(task)
-        return True
+        file_size = task.path.stat().st_size
+        if file_size < int(config["limit_size"]):
+            task.index = self.task_length
+            self.task_length += 1
+            self.task_list.append(task)
+            return True
+        else:
+            logging.debug(f"file size {file_size} is over limit_size")
+            logging.debug(f"cannot add task: {str(task.path)}")
+            return False
 
     def filter_task(self, execute_number=-1):
         if self.mode == "transcoding":
@@ -108,13 +116,17 @@ class Tasks:
         result = task.execute()
 
         if result == TaskReturnCode.Complete:
-            check_traffic_in_github_action()
-            if not task.path.exists():
+            if not check_upload_success(Path(config["rclone_log_path"])):
                 logging.ERROR(
-                    f"Output file was not uploaded successfully: {str(task.path)}"
+                    f"Output file cannot upload successfully: {str(task.path)}"
                 )
                 task.update_status(TaskStatus.Error)
                 sys.exit(1)
+            elif config["remove_origin"] == "true":
+                logging.debug(f"Output file upload successfully: {str(task.path)}")
+                rm(task.origin_paths)
+            else:
+                logging.debug(f"Output file upload successfully: {str(task.path)}")
 
         logging.debug(f"Complete Task: {str(task.path)}")
 

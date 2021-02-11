@@ -6,7 +6,10 @@ config = {
     "storage": getenv("storage", "none"),
     "role": getenv("role", "runner"),
     "sleep_time": getenv("sleep_time", "3600"),
+    # default 10GB
+    "limit_size": getenv("max_do_nothing", "10737418240"),
     "max_do_nothing": getenv("max_do_nothing", "10"),
+    "rclone_log_path": getenv("rclone_log_path", "/rclone.conf"),
     # only for ffmpeg
     "threads": getenv("threads", "0"),
     "remove_origin": getenv("remove_origin", "false").lower(),

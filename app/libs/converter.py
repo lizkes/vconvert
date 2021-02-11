@@ -5,7 +5,7 @@ from shutil import move
 from pathlib import Path
 from shlex import quote
 
-from .path import change_parent_dir, get_file_format, rm
+from .path import change_parent_dir, get_file_format
 from .encode import file_encoding, to_utf8
 from .info import Info
 from ..env import config
@@ -150,22 +150,17 @@ def ffmpeg_convert(input_path, temp_path):
                 "ffmpeg error, check debug level log for more information."
             )
 
-    # cleanup
-    if config["remove_origin"] == "true":
-        # remove origin file
-        rm(input_path)
-        logging.debug(f"Deleted origin file {input_path_str}")
-    else:
-        # rename and keep origin file
-        input_path.rename(input_path_str + ".origin")
-        logging.debug(f"Renamed origin file to {input_path_str}.origin")
+    # rename and keep origin file
+    origin_input_path = Path(f"{input_path_str}.origin")
+    input_path.rename(origin_input_path)
+    logging.debug(f"Renamed origin file to {str(origin_input_path)}")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
-    logging.debug(f"Moved temp file to {dist_path.as_posix()}")
+    logging.debug(f"Moved temp file to {str(dist_path)}")
 
-    return Path(dist_path)
+    return Path(dist_path), [origin_input_path]
 
 
 def handbrake_convert(input_path, temp_path):
@@ -281,22 +276,17 @@ def handbrake_convert(input_path, temp_path):
                 "handbrake error, check debug level log for more information."
             )
 
-    # cleanup
-    if config["remove_origin"] == "true":
-        # remove origin file
-        rm(input_path)
-        logging.debug(f"Deleted origin file {input_path_str}")
-    else:
-        # rename and keep origin file
-        input_path.rename(input_path_str + ".origin")
-        logging.debug(f"Renamed origin file to {input_path_str}.origin")
+    # rename and keep origin file
+    origin_input_path = Path(f"{input_path_str}.origin")
+    input_path.rename(origin_input_path)
+    logging.debug(f"Renamed origin file to {str(origin_input_path)}")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
-    logging.debug(f"Moved temp file to {dist_path.as_posix()}")
+    logging.debug(f"Moved temp file to {str(dist_path)}")
 
-    return Path(dist_path)
+    return Path(dist_path), [origin_input_path]
 
 
 # def uncompress(in_path_str, out_path_str):
@@ -454,23 +444,17 @@ def burn_sub(input_path, sub_path, temp_path):
                 "ffmpeg error, check debug level log for more information."
             )
 
-    # cleanup
-    if config["remove_origin"] == "true":
-        # remove origin file
-        rm(input_path)
-        logging.debug(f"Deleted origin file {input_path_str}")
-        rm(sub_path)
-        logging.debug(f"Deleted origin file {sub_path_str}")
-    else:
-        # rename and keep origin file
-        input_path.rename(f"{input_path_str}.origin")
-        logging.debug(f"Renamed origin file to {input_path_str}.origin")
-        sub_path.rename(f"{sub_path_str}.origin")
-        logging.debug(f"Renamed origin file to {sub_path_str}.origin")
+    # rename and keep origin file
+    origin_input_path = Path(f"{input_path_str}.origin")
+    origin_sub_path = Path(f"{sub_path_str}.origin")
+    input_path.rename(origin_input_path)
+    logging.debug(f"Renamed origin file to {str(origin_input_path)}")
+    sub_path.rename(origin_sub_path)
+    logging.debug(f"Renamed origin file to {str(origin_sub_path)}")
 
     # move target file
     dist_path = input_path.parent.joinpath(temp_path.name.rstrip("vctemp").rstrip("."))
     move(temp_path, dist_path)
     logging.debug(f"Moved temp file to {dist_path.as_posix()}")
 
-    return Path(dist_path)
+    return dist_path, [origin_input_path, origin_sub_path]

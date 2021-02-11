@@ -140,11 +140,11 @@ class TranscodingTask(Task):
                 if result is False:
                     self.update_status(TaskStatus.Done)
                     return TaskReturnCode.DoNothing
-                self.path = result
+                self.path, self.origin_paths = result
             elif (
                 self.ttype == "dvd" or self.ttype == "dvd-folder" or self.ttype == "iso"
             ):
-                self.path = handbrake_convert(input_path, temp_path)
+                self.path, self.origin_paths = handbrake_convert(input_path, temp_path)
             else:
                 logging.error(f"unknown task_type: {self.ttype}")
                 self.update_status(TaskStatus.Error)
@@ -218,7 +218,7 @@ class BurnsubTask(Task):
             return TaskReturnCode.Error
 
         try:
-            self.path = burn_sub(input_path, sub_path, temp_path)
+            self.path, self.origin_paths = burn_sub(input_path, sub_path, temp_path)
         except KeyboardInterrupt:
             logging.info("\nUser stop tasks")
             rm(temp_path)
